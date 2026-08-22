@@ -1,0 +1,8 @@
+# pnpm 11 refuses to finish an install while any dependency's build script is
+# left undecided (ERR_PNPM_IGNORED_BUILDS), so every package that ships a
+# lifecycle script must be answered explicitly here.
+allowBuilds:
+  # postinstall only prints a funding banner
+  core-js: false
+  # napi-postinstall shim that resolves the platform-native binding
+  unrs-resolver: true
