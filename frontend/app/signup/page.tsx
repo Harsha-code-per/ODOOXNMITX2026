@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { PersonaDemoBar } from "@/components/shared/PersonaDemoBar";
-import { User, Mail, Lock, Building2, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 
 export default function SignupPage() {
@@ -39,12 +39,10 @@ export default function SignupPage() {
       <PersonaDemoBar />
 
       <main className="flex-1 flex items-center justify-center p-4 z-10 my-8">
-        <div className="w-full max-w-lg glass-panel rounded-3xl border border-slate-200 shadow-2xl p-6 sm:p-8 relative">
+        <div className="w-full max-w-lg bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-8 relative">
           <div className="flex flex-col items-center text-center mb-6">
-            <div className="w-14 h-14 rounded-2xl p-1 bg-white border border-cyan-300 shadow-md flex items-center justify-center mb-2 overflow-hidden">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logo.png" alt="Dayflow Logo" className="w-full h-full object-contain" />
-            </div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="Dayflow Logo" className="h-12 w-12 object-contain mb-2" />
             <h1 className="text-2xl font-bold font-heading text-slate-900">Register New Employee</h1>
             <p className="text-xs text-slate-500">Join your team on Dayflow HRMS</p>
           </div>
@@ -59,7 +57,7 @@ export default function SignupPage() {
                   onChange={(e) => setFirstName(e.target.value)}
                   placeholder="e.g. Marcus"
                   required
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 text-xs"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:border-cyan-500 text-xs"
                 />
               </div>
               <div>
@@ -70,7 +68,7 @@ export default function SignupPage() {
                   onChange={(e) => setLastName(e.target.value)}
                   placeholder="e.g. Vance"
                   required
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 text-xs"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:border-cyan-500 text-xs"
                 />
               </div>
             </div>
@@ -110,7 +108,7 @@ export default function SignupPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="marcus.vance@dayflow.io"
                 required
-                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 text-xs"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:border-cyan-500 text-xs"
               />
             </div>
 
@@ -122,7 +120,7 @@ export default function SignupPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••••••"
                 required
-                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 text-xs font-mono"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:border-cyan-500 text-xs font-mono"
               />
             </div>
 
@@ -134,7 +132,7 @@ export default function SignupPage() {
                   onClick={() => setRole("EMPLOYEE")}
                   className={`py-2 rounded-xl text-xs font-bold border transition-all ${
                     role === "EMPLOYEE"
-                      ? "bg-cyan-50 border-cyan-400 text-cyan-800 shadow-xs"
+                      ? "bg-slate-900 text-white border-slate-900 shadow-xs"
                       : "bg-slate-50 border-slate-200 text-slate-600"
                   }`}
                 >
@@ -145,7 +143,7 @@ export default function SignupPage() {
                   onClick={() => setRole("HR")}
                   className={`py-2 rounded-xl text-xs font-bold border transition-all ${
                     role === "HR"
-                      ? "bg-cyan-50 border-cyan-400 text-cyan-800 shadow-xs"
+                      ? "bg-slate-900 text-white border-slate-900 shadow-xs"
                       : "bg-slate-50 border-slate-200 text-slate-600"
                   }`}
                 >
@@ -157,7 +155,7 @@ export default function SignupPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-xs shadow-md shadow-cyan-500/25 transition-all hover:scale-[1.02] active:scale-[0.98] mt-3 flex items-center justify-center gap-1.5"
+              className="w-full py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-xs transition-all hover:scale-[1.01] active:scale-[0.99] mt-3 flex items-center justify-center gap-1.5"
             >
               <span>{isLoading ? "Creating..." : "Complete Registration"}</span>
               <ArrowRight className="w-4 h-4" />
@@ -174,7 +172,7 @@ export default function SignupPage() {
       </main>
 
       <footer className="w-full text-center py-4 text-xs text-slate-400 z-10">
-        Dayflow HRMS • Odoo × NMIT Hackathon 2026
+        © 2026 Dayflow Technologies Inc. • Enterprise Workforce Operating System
       </footer>
     </div>
   );

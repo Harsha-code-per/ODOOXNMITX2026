@@ -12,7 +12,6 @@ import {
   Menu,
   Clock,
   ChevronDown,
-  CheckCircle2,
 } from "lucide-react";
 import { DayflowApiClient } from "@/lib/api";
 import { NotificationItem } from "@/lib/mock-data";
@@ -63,7 +62,7 @@ export function Navbar({ onToggleSidebar, onOpenFlowAI }: NavbarProps) {
   return (
     <header className="sticky top-0 z-40 w-full bg-white/90 backdrop-blur-xl border-b border-slate-200/80 px-4 sm:px-6 py-2.5 transition-all shadow-xs">
       <div className="flex items-center justify-between gap-4">
-        {/* Left: Mobile Toggle & Brand Logo */}
+        {/* Left: Mobile Toggle & Clean Brand Logo */}
         <div className="flex items-center gap-3">
           {onToggleSidebar && (
             <button
@@ -76,22 +75,15 @@ export function Navbar({ onToggleSidebar, onOpenFlowAI }: NavbarProps) {
           )}
 
           <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="relative flex items-center justify-center w-9 h-9 rounded-xl p-1 bg-white border border-cyan-300 shadow-sm group-hover:scale-105 transition-transform overflow-hidden">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logo.png" alt="Dayflow Logo" className="w-full h-full object-contain" />
-              <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500 border border-white" />
-            </div>
-            <div className="flex flex-col">
-              <span className="font-heading font-extrabold text-base sm:text-lg tracking-tight flex items-center gap-1.5 text-slate-900">
-                Dayflow
-                <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.2 rounded-md bg-cyan-100 text-cyan-800 border border-cyan-200">
-                  HRMS
-                </span>
-              </span>
-              <span className="text-[10px] text-slate-500 hidden sm:inline -mt-0.5 font-medium">
-                Every workday, perfectly aligned.
-              </span>
-            </div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/logo.png"
+              alt="Dayflow"
+              className="h-8 w-8 object-contain transition-transform group-hover:scale-105"
+            />
+            <span className="font-heading font-extrabold text-lg tracking-tight text-slate-900">
+              Dayflow
+            </span>
           </Link>
         </div>
 
@@ -99,7 +91,7 @@ export function Navbar({ onToggleSidebar, onOpenFlowAI }: NavbarProps) {
         <div className="hidden md:flex items-center gap-3 flex-1 max-w-md mx-4">
           <button
             onClick={onOpenFlowAI}
-            className="w-full flex items-center justify-between px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-xs text-slate-600 hover:text-slate-900 transition-all shadow-inner group"
+            className="w-full flex items-center justify-between px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-xs text-slate-600 hover:text-slate-900 transition-all group"
           >
             <span className="flex items-center gap-2">
               <Sparkles className="w-3.5 h-3.5 text-cyan-600 group-hover:rotate-12 transition-transform" />
@@ -113,9 +105,9 @@ export function Navbar({ onToggleSidebar, onOpenFlowAI }: NavbarProps) {
 
         {/* Right Actions: Clock, Notifications, Profile Menu */}
         <div className="flex items-center gap-2.5 sm:gap-3">
-          {/* Live IST / UTC Clock Badge */}
-          <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200 text-xs font-mono font-bold text-slate-800 shadow-inner">
-            <Clock className="w-3.5 h-3.5 text-cyan-600 animate-pulse" />
+          {/* Live Clock Badge */}
+          <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200 text-xs font-mono font-bold text-slate-800">
+            <Clock className="w-3.5 h-3.5 text-cyan-600" />
             <span>{timeStr || "09:00:00 AM"}</span>
           </div>
 
@@ -240,7 +232,7 @@ export function Navbar({ onToggleSidebar, onOpenFlowAI }: NavbarProps) {
           ) : (
             <Link
               href="/login"
-              className="px-3.5 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold shadow-sm transition-all"
+              className="px-3.5 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold shadow-xs transition-all"
             >
               Sign In
             </Link>

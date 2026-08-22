@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { PersonaDemoBar } from "@/components/shared/PersonaDemoBar";
-import { Lock, Mail, ArrowRight, UserCheck, ShieldCheck, Zap } from "lucide-react";
+import { Lock, Mail, ArrowRight, UserCheck, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 
 export default function LoginPage() {
@@ -45,51 +45,46 @@ export default function LoginPage() {
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col justify-between relative overflow-hidden font-sans">
       <PersonaDemoBar />
 
-      {/* Ambient background glow */}
-      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-cyan-200/40 rounded-full blur-[140px] pointer-events-none" />
-
       <main className="flex-1 flex items-center justify-center p-4 z-10 my-8">
-        <div className="w-full max-w-md glass-panel rounded-3xl border border-slate-200/90 shadow-2xl p-6 sm:p-8 relative">
-          {/* Logo & Header */}
+        <div className="w-full max-w-md bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-8 relative">
+          {/* Clean Logo & Header */}
           <div className="flex flex-col items-center text-center mb-6">
-            <div className="w-16 h-16 rounded-2xl p-1.5 bg-white border border-cyan-300 shadow-md flex items-center justify-center mb-3 overflow-hidden">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logo.png" alt="Dayflow Logo" className="w-full h-full object-contain" />
-            </div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="Dayflow Logo" className="h-12 w-12 object-contain mb-3" />
             <h1 className="text-2xl font-bold font-heading text-slate-900">Welcome to Dayflow</h1>
             <p className="text-xs text-slate-500 mt-1">Sign in to your Enterprise HRMS Workspace</p>
           </div>
 
-          {/* 1-Click Persona Demo Auto-Fill Buttons */}
-          <div className="p-4 rounded-2xl bg-cyan-50/70 border border-cyan-200 mb-6">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-800 block mb-2 text-center">
-              ⚡ 1-CLICK JUDGE DEMO LOGIN
+          {/* Quick Persona Demo Switcher */}
+          <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 mb-6">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block mb-2 text-center">
+              DEMO PERSONA QUICK ACCESS
             </span>
             <div className="grid grid-cols-3 gap-2 text-[11px]">
               <button
                 type="button"
                 onClick={() => handleQuickDemo("alex")}
-                className="px-2 py-2 rounded-xl bg-white hover:bg-cyan-500 hover:text-white text-slate-800 font-semibold border border-cyan-200 shadow-xs transition-all text-center flex flex-col items-center gap-1 group"
+                className="px-2 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-800 font-semibold border border-slate-200 shadow-2xs transition-all text-center flex flex-col items-center gap-1"
               >
-                <UserCheck className="w-4 h-4 text-cyan-600 group-hover:text-white" />
+                <UserCheck className="w-4 h-4 text-cyan-600" />
                 <span>Alex (Emp)</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => handleQuickDemo("sarah")}
-                className="px-2 py-2 rounded-xl bg-white hover:bg-cyan-500 hover:text-white text-slate-800 font-semibold border border-cyan-200 shadow-xs transition-all text-center flex flex-col items-center gap-1 group"
+                className="px-2 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-800 font-semibold border border-slate-200 shadow-2xs transition-all text-center flex flex-col items-center gap-1"
               >
-                <ShieldCheck className="w-4 h-4 text-cyan-600 group-hover:text-white" />
+                <ShieldCheck className="w-4 h-4 text-cyan-600" />
                 <span>Sarah (HR)</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => handleQuickDemo("admin")}
-                className="px-2 py-2 rounded-xl bg-white hover:bg-cyan-500 hover:text-white text-slate-800 font-semibold border border-cyan-200 shadow-xs transition-all text-center flex flex-col items-center gap-1 group"
+                className="px-2 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-800 font-semibold border border-slate-200 shadow-2xs transition-all text-center flex flex-col items-center gap-1"
               >
-                <ShieldCheck className="w-4 h-4 text-cyan-600 group-hover:text-white" />
+                <ShieldCheck className="w-4 h-4 text-cyan-600" />
                 <span>Arthur (Admin)</span>
               </button>
             </div>
@@ -107,7 +102,7 @@ export default function LoginPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="alex.rivera@dayflow.io"
                   required
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 text-xs"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 text-xs"
                 />
               </div>
             </div>
@@ -122,7 +117,7 @@ export default function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••••••"
                   required
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 text-xs font-mono"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 text-xs font-mono"
                 />
               </div>
             </div>
@@ -130,7 +125,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-xs shadow-md shadow-cyan-500/25 transition-all hover:scale-[1.02] active:scale-[0.98] mt-2 flex items-center justify-center gap-1.5"
+              className="w-full py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-xs transition-all hover:scale-[1.01] active:scale-[0.99] mt-2 flex items-center justify-center gap-1.5"
             >
               <span>{isLoading ? "Signing in..." : "Sign In to Workspace"}</span>
               <ArrowRight className="w-4 h-4" />
@@ -147,7 +142,7 @@ export default function LoginPage() {
       </main>
 
       <footer className="w-full text-center py-4 text-xs text-slate-400 z-10">
-        Dayflow HRMS • Odoo × NMIT Hackathon 2026
+        © 2026 Dayflow Technologies Inc. • Enterprise Workforce Operating System
       </footer>
     </div>
   );
