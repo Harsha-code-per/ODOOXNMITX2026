@@ -10,12 +10,7 @@ import {
   Palmtree,
   ArrowRight,
   CheckCircle2,
-  Users,
   ShieldCheck,
-  Zap,
-  Lock,
-  ChevronRight,
-  TrendingUp,
 } from "lucide-react";
 import Lenis from "lenis";
 
@@ -57,45 +52,46 @@ export default function LandingPage() {
       {/* 3D WebGL Kinetic Wave Mesh Background */}
       <ParticleScene scrollProgress={scrollProgress} />
 
-      {/* Clean Public Navbar */}
-      <header className="sticky top-0 z-40 w-full bg-white/80 backdrop-blur-xl border-b border-slate-200/80 px-6 sm:px-12 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          {/* Clean Brand: Logo with NO borders + Brand Title */}
-          <Link href="/" className="flex items-center gap-3 group">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/logo.png"
-              alt="Dayflow"
-              className="h-8 w-8 object-contain transition-transform group-hover:scale-105"
-            />
-            <span className="font-heading font-extrabold text-xl tracking-tight text-slate-900">
-              Dayflow
-            </span>
+      {/* Pinned Independent Floating Corner Islands (No dividing border bar) */}
+      <header className="fixed top-4 sm:top-5 left-4 sm:left-8 right-4 sm:right-8 z-50 pointer-events-none flex items-center justify-between">
+        {/* Left Floating Brand Pill */}
+        <Link
+          href="/"
+          className="pointer-events-auto flex items-center gap-2.5 px-4 py-2 rounded-2xl bg-white/85 backdrop-blur-xl border border-slate-200/80 shadow-[0_4px_20px_-2px_rgba(15,23,42,0.06)] hover:bg-white hover:border-slate-300 transition-all group"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/logo.png"
+            alt="Dayflow"
+            className="h-6 w-6 sm:h-7 sm:w-7 object-contain transition-transform group-hover:scale-105"
+          />
+          <span className="font-heading font-extrabold text-base sm:text-lg tracking-tight text-slate-900">
+            Dayflow
+          </span>
+        </Link>
+
+        {/* Right Floating Actions Pill */}
+        <div className="pointer-events-auto flex items-center gap-1.5 p-1.5 rounded-2xl bg-white/85 backdrop-blur-xl border border-slate-200/80 shadow-[0_4px_20px_-2px_rgba(15,23,42,0.06)]">
+          <Link
+            href="/login"
+            className="px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-700 hover:text-slate-900 hover:bg-slate-100 transition-colors"
+          >
+            Sign In
           </Link>
 
-          {/* Right Navigation: Only Sign In & Get Started */}
-          <div className="flex items-center gap-3">
-            <Link
-              href="/login"
-              className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors"
-            >
-              Sign In
-            </Link>
-
-            <Link
-              href="/signup"
-              className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-xs transition-all hover:scale-[1.02]"
-            >
-              Get Started
-            </Link>
-          </div>
+          <Link
+            href="/signup"
+            className="px-4 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-xs transition-all hover:scale-[1.02]"
+          >
+            Get Started
+          </Link>
         </div>
       </header>
 
       {/* Main Content Area */}
       <main className="flex-1 relative z-10">
         {/* Hero Section */}
-        <section className="min-h-[85vh] flex flex-col items-center justify-center text-center px-4 sm:px-6 pt-16 pb-20">
+        <section className="min-h-[90vh] flex flex-col items-center justify-center text-center px-4 sm:px-6 pt-24 pb-16">
           <div className="max-w-4xl mx-auto flex flex-col items-center">
             {/* Minimal Tag */}
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-slate-200 text-slate-600 text-xs font-medium mb-6 shadow-xs">

@@ -10,11 +10,22 @@ interface ParticleSceneProps {
 export function ParticleScene({ scrollProgress = 0 }: ParticleSceneProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<number>(0);
-  const mouseRef = useRef<{ x: number; y: number; targetX: number; targetY: number }>({
+  const mouseRef = useRef<{
+    x: number;
+    y: number;
+    targetX: number;
+    targetY: number;
+    worldPoint: THREE.Vector3;
+    targetWorldPoint: THREE.Vector3;
+    isHovering: boolean;
+  }>({
     x: 0,
     y: 0,
     targetX: 0,
     targetY: 0,
+    worldPoint: new THREE.Vector3(0, -5, 0),
+    targetWorldPoint: new THREE.Vector3(0, -5, 0),
+    isHovering: false,
   });
 
   useEffect(() => {
@@ -25,7 +36,7 @@ export function ParticleScene({ scrollProgress = 0 }: ParticleSceneProps) {
     const container = containerRef.current;
     if (!container) return;
 
-    // 1. Three.js Scene, Camera & Renderer
+    // 1. Scene, Camera & Renderer
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(
       52,
@@ -33,7 +44,7 @@ export function ParticleScene({ scrollProgress = 0 }: ParticleSceneProps) {
       0.1,
       1000
     );
-    camera.position.set(0, 13, 44);
+    camera.position.set(0, 14, 42);
 
     const renderer = new THREE.WebGLRenderer({
       antialias: true,
@@ -42,12 +53,12 @@ export function ParticleScene({ scrollProgress = 0 }: ParticleSceneProps) {
     });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setClearColor(0x000000, 0); // Pure transparent for studio light canvas
+    renderer.setClearColor(0x000000, 0); // Pure transparent background
     container.appendChild(renderer.domElement);
 
-    // 2. Dynamic 3D Geometric Wave Grid (Lines + Points)
-    const gridCols = 84;
-    const gridRows = 64;
+    // 2. High-Density 3D Wave Mesh (Grid Plane)
+    const gridCols = 90;
+    const gridRows = 70;
     const gridSpacingX = 1.45;
     const gridSpacingZ = 1.45;
     const totalPoints = gridCols * gridRows;
@@ -58,7 +69,8 @@ export function ParticleScene({ scrollProgress = 0 }: ParticleSceneProps) {
     const colors = new Float32Array(totalPoints * 3);
 
     const cyanColor = new THREE.Color("#0891B2");
-    const deepBlueColor = new THREE.Color("#0284C7");
+    const oceanColor = new THREE.Color("#0284C7");
+    const tealColor = new THREE.Color("#0D9488");
     const slateColor = new THREE.Color("#64748B");
 
     let idx = 0;
@@ -76,12 +88,18 @@ export function ParticleScene({ scrollProgress = 0 }: ParticleSceneProps) {
         origPositions[idx * 3 + 1] = y;
         origPositions[idx * 3 + 2] = z;
 
-        // Depth & position color gradient
-        const t = (r / gridRows) * 0.7 + (c / gridCols) * 0.3;
-        const col = cyanColor.clone().lerp(deepBlueColor, t).lerp(slateColor, Math.random() * 0.2);
-        colors[idx * 3] = col.r;
-        colors[idx * 3 + 1] = col.g;
-        colors[idx * 3 + 2] = col.b;
+        // Depth and radial gradient palette
+        const normR = r / gridRows;
+        const normC = c / gridCols;
+        const mixedColor = cyanColor
+          .clone()
+          .lerp(oceanColor, normR * 0.7)
+          .lerp(tealColor, normC * 0.4)
+          .lerp(slateColor, Math.random() * 0.15);
+
+        colors[idx * 3] = mixedColor.r;
+        colors[idx * 3 + 1] = mixedColor.g;
+        colors[idx * 3 + 2] = mixedColor.b;
 
         idx++;
       }
@@ -90,25 +108,28 @@ export function ParticleScene({ scrollProgress = 0 }: ParticleSceneProps) {
     planeGeo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
     planeGeo.setAttribute("color", new THREE.BufferAttribute(colors, 3));
 
-    // Custom shader for visible, crisp particle nodes
+    // Custom Shader for Dynamic Responsive Point Nodes
     const pointMaterial = new THREE.ShaderMaterial({
       vertexShader: `
         attribute vec3 color;
         varying vec3 vColor;
         varying float vAlpha;
         uniform float uTime;
-        uniform vec2 uMouse;
+        uniform vec3 uMouseWorld;
 
         void main() {
           vColor = color;
           vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
           
-          // Distance falloff for subtle depth fading
           float depth = -mvPosition.z;
-          vAlpha = smoothstep(95.0, 18.0, depth) * 0.8;
+          vAlpha = smoothstep(100.0, 20.0, depth) * 0.85;
 
-          // Crisp, high-DPI point size
-          gl_PointSize = clamp(240.0 / depth, 3.0, 9.0);
+          // Proximity to mouse world point illuminates vertices
+          float distToMouse = length(position.xz - uMouseWorld.xz);
+          float mouseGlow = smoothstep(16.0, 0.0, distToMouse);
+          vAlpha += mouseGlow * 0.35;
+
+          gl_PointSize = clamp(260.0 / depth, 3.5, 10.0) * (1.0 + mouseGlow * 0.6);
           gl_Position = projectionMatrix * mvPosition;
         }
       `,
@@ -119,13 +140,13 @@ export function ParticleScene({ scrollProgress = 0 }: ParticleSceneProps) {
         void main() {
           float dist = length(gl_PointCoord - vec2(0.5));
           if (dist > 0.5) discard;
-          float circleAlpha = smoothstep(0.5, 0.1, dist) * vAlpha;
+          float circleAlpha = smoothstep(0.5, 0.12, dist) * vAlpha;
           gl_FragColor = vec4(vColor, circleAlpha);
         }
       `,
       uniforms: {
         uTime: { value: 0 },
-        uMouse: { value: new THREE.Vector2(0, 0) },
+        uMouseWorld: { value: new THREE.Vector3(0, 0, 0) },
       },
       transparent: true,
       depthWrite: false,
@@ -134,7 +155,7 @@ export function ParticleScene({ scrollProgress = 0 }: ParticleSceneProps) {
     const pointMesh = new THREE.Points(planeGeo, pointMaterial);
     scene.add(pointMesh);
 
-    // 3. Connected 3D Wireframe Lattice Lines
+    // Connected Lattice Lines
     const lineIndices: number[] = [];
     for (let r = 0; r < gridRows; r++) {
       for (let c = 0; c < gridCols; c++) {
@@ -162,40 +183,76 @@ export function ParticleScene({ scrollProgress = 0 }: ParticleSceneProps) {
     const gridLines = new THREE.LineSegments(lineGeo, lineMat);
     scene.add(gridLines);
 
-    // 4. Central 3D Digital Twin Orbital Hologram
+    // 3. Central/Right 3D Digital Twin Orbital Hologram (Shifted far right)
     const coreGroup = new THREE.Group();
-    coreGroup.position.set(24, 2, -18);
+    coreGroup.position.set(34, 3, -16); // Placed further right to frame the hero perfectly
 
-    const sphereGeo = new THREE.IcosahedronGeometry(7, 2);
+    // Geodesic 3D Sphere Wireframe
+    const sphereGeo = new THREE.IcosahedronGeometry(7.5, 2);
     const sphereMat = new THREE.MeshBasicMaterial({
       color: 0x0891b2,
       wireframe: true,
       transparent: true,
-      opacity: 0.15,
+      opacity: 0.22,
     });
     const coreSphere = new THREE.Mesh(sphereGeo, sphereMat);
     coreGroup.add(coreSphere);
 
-    const ring1Geo = new THREE.TorusGeometry(8.5, 0.05, 16, 100);
-    const ringMat1 = new THREE.MeshBasicMaterial({ color: 0x0284c7, transparent: true, opacity: 0.28 });
+    // Holographic Orbital Rings
+    const ring1Geo = new THREE.TorusGeometry(9.2, 0.06, 16, 120);
+    const ringMat1 = new THREE.MeshBasicMaterial({ color: 0x0284c7, transparent: true, opacity: 0.32 });
     const ring1 = new THREE.Mesh(ring1Geo, ringMat1);
     ring1.rotation.x = Math.PI / 3;
     coreGroup.add(ring1);
 
-    const ring2Geo = new THREE.TorusGeometry(9.8, 0.05, 16, 100);
-    const ringMat2 = new THREE.MeshBasicMaterial({ color: 0x0891b2, transparent: true, opacity: 0.2 });
+    const ring2Geo = new THREE.TorusGeometry(10.6, 0.06, 16, 120);
+    const ringMat2 = new THREE.MeshBasicMaterial({ color: 0x0891b2, transparent: true, opacity: 0.22 });
     const ring2 = new THREE.Mesh(ring2Geo, ringMat2);
-    ring2.rotation.y = Math.PI / 4;
+    ring2.rotation.y = Math.PI / 3.5;
+    ring2.rotation.z = Math.PI / 6;
     coreGroup.add(ring2);
+
+    // Central Floating Glow Core
+    const innerSphereGeo = new THREE.IcosahedronGeometry(3.5, 1);
+    const innerSphereMat = new THREE.MeshBasicMaterial({
+      color: 0x06b6d4,
+      wireframe: true,
+      transparent: true,
+      opacity: 0.45,
+    });
+    const innerCore = new THREE.Mesh(innerSphereGeo, innerSphereMat);
+    coreGroup.add(innerCore);
 
     scene.add(coreGroup);
 
-    // 5. Mouse Event Listeners with Inertia Lerp
+    // 4. Mouse 3D Raycasting & Tracking
+    const raycaster = new THREE.Raycaster();
+    const ndcMouse = new THREE.Vector2(-999, -999);
+    const groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 5); // Ground intersection plane at y=-5
+    const intersectPoint = new THREE.Vector3();
+
     const handleMouseMove = (e: MouseEvent) => {
-      mouseRef.current.targetX = (e.clientX / window.innerWidth) * 2 - 1;
-      mouseRef.current.targetY = -(e.clientY / window.innerHeight) * 2 + 1;
+      mouseRef.current.isHovering = true;
+      const x = (e.clientX / window.innerWidth) * 2 - 1;
+      const y = -(e.clientY / window.innerHeight) * 2 + 1;
+      mouseRef.current.targetX = x;
+      mouseRef.current.targetY = y;
+
+      ndcMouse.set(x, y);
+      raycaster.setFromCamera(ndcMouse, camera);
+
+      if (raycaster.ray.intersectPlane(groundPlane, intersectPoint)) {
+        mouseRef.current.targetWorldPoint.copy(intersectPoint);
+      }
     };
+
+    const handleMouseLeave = () => {
+      mouseRef.current.isHovering = false;
+      mouseRef.current.targetWorldPoint.set(999, 999, 999);
+    };
+
     window.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseleave", handleMouseLeave);
 
     const handleResize = () => {
       camera.aspect = window.innerWidth / window.innerHeight;
@@ -205,7 +262,7 @@ export function ParticleScene({ scrollProgress = 0 }: ParticleSceneProps) {
     };
     window.addEventListener("resize", handleResize);
 
-    // 6. 60FPS Kinetic Animation Loop
+    // 5. 60FPS High-Performance Kinetic Animation Loop
     let animId: number;
     const clock = new THREE.Clock();
 
@@ -214,14 +271,16 @@ export function ParticleScene({ scrollProgress = 0 }: ParticleSceneProps) {
       const elapsedTime = clock.getElapsedTime();
 
       // Smooth mouse spring physics
-      mouseRef.current.x += (mouseRef.current.targetX - mouseRef.current.x) * 0.04;
-      mouseRef.current.y += (mouseRef.current.targetY - mouseRef.current.y) * 0.04;
+      mouseRef.current.x += (mouseRef.current.targetX - mouseRef.current.x) * 0.05;
+      mouseRef.current.y += (mouseRef.current.targetY - mouseRef.current.y) * 0.05;
+      mouseRef.current.worldPoint.lerp(mouseRef.current.targetWorldPoint, 0.1);
 
       const mouseX = mouseRef.current.x;
       const mouseY = mouseRef.current.y;
+      const mouseW = mouseRef.current.worldPoint;
       const scroll = scrollRef.current;
 
-      // Deform 3D grid vertices
+      // Real-time Vertex Deformation with Harmonic Sine Waves & Mouse Ripple Waves
       const posArray = planeGeo.attributes.position.array as Float32Array;
       let pIdx = 0;
 
@@ -230,18 +289,25 @@ export function ParticleScene({ scrollProgress = 0 }: ParticleSceneProps) {
           const ox = origPositions[pIdx * 3];
           const oz = origPositions[pIdx * 3 + 2];
 
-          // 3D Harmonic Wave Equation (Low baseline so it cradles underneath hero)
-          const wave1 = Math.sin(ox * 0.07 + elapsedTime * 1.3) * Math.cos(oz * 0.07 + elapsedTime * 1.0) * 3.4;
-          const wave2 = Math.sin(ox * 0.14 - oz * 0.09 + elapsedTime * 0.7) * 1.4;
+          // 1. Natural Organic Harmonic Topography
+          const harmonic1 = Math.sin(ox * 0.07 + elapsedTime * 1.3) * Math.cos(oz * 0.07 + elapsedTime * 1.0) * 3.5;
+          const harmonic2 = Math.sin(ox * 0.14 - oz * 0.09 + elapsedTime * 0.8) * 1.5;
 
-          // Interactive mouse depression
-          const distToMouse = Math.hypot(ox - mouseX * 30, oz - mouseY * 20);
-          const mouseDisplace = Math.max(0, 16 - distToMouse) * 0.2;
+          // 2. High-Impact Mouse Dynamic Ripple (Interactive Liquid Physics)
+          let mouseRipple = 0;
+          if (mouseRef.current.isHovering) {
+            const dist = Math.hypot(ox - mouseW.x, oz - mouseW.z);
+            if (dist < 28.0) {
+              const ripplePhase = dist * 0.5 - elapsedTime * 4.5;
+              const damp = Math.exp(-dist * 0.1);
+              mouseRipple = Math.sin(ripplePhase) * damp * 3.8;
+            }
+          }
 
-          // Scroll lift transformation
-          const scrollElevation = Math.sin(ox * 0.05 + scroll * Math.PI * 2) * (scroll * 3.5);
+          // 3. Scroll Dynamic Elevation Morph
+          const scrollElevation = Math.sin(ox * 0.06 + scroll * Math.PI * 2) * (scroll * 4.0);
 
-          posArray[pIdx * 3 + 1] = wave1 + wave2 + mouseDisplace + scrollElevation - 6.5;
+          posArray[pIdx * 3 + 1] = harmonic1 + harmonic2 + mouseRipple + scrollElevation - 6.5;
           pIdx++;
         }
       }
@@ -249,27 +315,30 @@ export function ParticleScene({ scrollProgress = 0 }: ParticleSceneProps) {
       planeGeo.attributes.position.needsUpdate = true;
       lineGeo.attributes.position.needsUpdate = true;
 
-      // Rotate central orbital structure
+      // Rotate Digital Twin Hologram
       coreSphere.rotation.x = elapsedTime * 0.12;
       coreSphere.rotation.y = elapsedTime * 0.18;
-      ring1.rotation.z = elapsedTime * 0.2;
-      ring2.rotation.x = elapsedTime * 0.15;
+      innerCore.rotation.x = -elapsedTime * 0.25;
+      innerCore.rotation.y = -elapsedTime * 0.3;
+      ring1.rotation.z = elapsedTime * 0.22;
+      ring2.rotation.x = elapsedTime * 0.16;
 
       // Scrollytelling Choreography
-      const targetCamX = mouseX * 4 - scroll * 6;
-      const targetCamY = 13 - scroll * 10 + mouseY * 2.5;
-      const targetCamZ = 44 - scroll * 14;
+      const targetCamX = mouseX * 5 - scroll * 6;
+      const targetCamY = 14 - scroll * 10 + mouseY * 2.5;
+      const targetCamZ = 42 - scroll * 14;
 
       camera.position.x += (targetCamX - camera.position.x) * 0.05;
       camera.position.y += (targetCamY - camera.position.y) * 0.05;
       camera.position.z += (targetCamZ - camera.position.z) * 0.05;
-      camera.lookAt(scroll * 8, -4, -12);
+      camera.lookAt(scroll * 6, -4, -12);
 
-      coreGroup.position.x = 24 - scroll * 38;
-      coreGroup.position.y = 2 + scroll * 6;
+      // Shift sphere position along scroll trajectory
+      coreGroup.position.x = 34 - scroll * 42;
+      coreGroup.position.y = 3 + scroll * 7;
 
       pointMaterial.uniforms.uTime.value = elapsedTime;
-      pointMaterial.uniforms.uMouse.value.set(mouseX, mouseY);
+      pointMaterial.uniforms.uMouseWorld.value.copy(mouseW);
 
       renderer.render(scene, camera);
     };
@@ -279,6 +348,7 @@ export function ParticleScene({ scrollProgress = 0 }: ParticleSceneProps) {
     return () => {
       cancelAnimationFrame(animId);
       window.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseleave", handleMouseLeave);
       window.removeEventListener("resize", handleResize);
       renderer.dispose();
       planeGeo.dispose();
@@ -286,11 +356,13 @@ export function ParticleScene({ scrollProgress = 0 }: ParticleSceneProps) {
       sphereGeo.dispose();
       ring1Geo.dispose();
       ring2Geo.dispose();
+      innerSphereGeo.dispose();
       pointMaterial.dispose();
       lineMat.dispose();
       sphereMat.dispose();
       ringMat1.dispose();
       ringMat2.dispose();
+      innerSphereMat.dispose();
       if (container.contains(renderer.domElement)) {
         container.removeChild(renderer.domElement);
       }
