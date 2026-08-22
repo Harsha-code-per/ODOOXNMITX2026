@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { PersonaDemoBar } from "@/components/shared/PersonaDemoBar";
-import { Lock, Mail, ArrowRight, UserCheck, ShieldCheck, ShieldAlert, Sparkles } from "lucide-react";
+import { Lock, Mail, ArrowRight, UserCheck, ShieldCheck, ShieldAlert, Sparkles, KeyRound } from "lucide-react";
 import { toast } from "sonner";
 
 export default function LoginPage() {
@@ -165,6 +165,20 @@ export default function LoginPage() {
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>
+
+          {/* Dedicated Platform Super Admin Portal Button */}
+          <div className="mt-5 p-3 rounded-2xl bg-cyan-50/70 border border-cyan-200/80 flex items-center justify-between">
+            <div>
+              <span className="text-[11px] font-bold text-cyan-950 block">Dayflow Platform Staff?</span>
+              <span className="text-[10px] text-cyan-800">Access Super Admin control plane</span>
+            </div>
+            <Link
+              href="/platform-admin/login"
+              className="px-3 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-[11px] font-bold shadow-2xs transition-all"
+            >
+              Platform Login →
+            </Link>
+          </div>
 
           <div className="mt-6 pt-4 border-t border-slate-100 text-center text-xs text-slate-500 flex items-center justify-between">
             <Link href="/contact" className="text-cyan-700 hover:underline font-bold">

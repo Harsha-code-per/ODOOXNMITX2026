@@ -51,26 +51,23 @@ export default function PlatformAdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white flex flex-col justify-between relative overflow-hidden font-sans selection:bg-cyan-500 selection:text-black">
-      {/* Background Radial Glow */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-cyan-600/10 rounded-full blur-3xl pointer-events-none" />
-
+    <div className="min-h-screen bg-[#fafafc] text-slate-900 flex flex-col justify-between relative overflow-hidden font-sans selection:bg-cyan-500/20 selection:text-cyan-900">
       {/* Top Header */}
-      <header className="w-full border-b border-slate-800/80 px-6 py-4 flex items-center justify-between relative z-10">
+      <header className="w-full bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between relative z-10 shadow-2xs">
         <Link href="/" className="flex items-center gap-2.5 group">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo.png" alt="Dayflow" className="h-7 w-7 object-contain" />
-          <span className="font-heading font-extrabold text-lg tracking-tight text-white">
+          <span className="font-heading font-extrabold text-lg tracking-tight text-slate-900">
             Dayflow
           </span>
-          <span className="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold uppercase tracking-widest bg-cyan-950 text-cyan-400 border border-cyan-800">
-            Internal Ops
+          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-slate-900 text-white shadow-2xs">
+            Platform Owner Portal
           </span>
         </Link>
 
         <Link
           href="/"
-          className="text-xs font-semibold text-slate-400 hover:text-white transition-colors"
+          className="text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors"
         >
           ← Return to Public Site
         </Link>
@@ -78,34 +75,34 @@ export default function PlatformAdminLoginPage() {
 
       {/* Main Login Card */}
       <main className="flex-1 flex items-center justify-center p-4 z-10 my-8">
-        <div className="w-full max-w-md bg-slate-900/90 backdrop-blur-2xl rounded-3xl border border-slate-800 shadow-2xl p-6 sm:p-8 relative">
-          {/* Security Badge */}
+        <div className="w-full max-w-md bg-white rounded-3xl border border-slate-200 shadow-xl p-6 sm:p-8 relative">
+          {/* Logo & Badge */}
           <div className="flex flex-col items-center text-center mb-6">
-            <div className="w-12 h-12 rounded-2xl bg-cyan-950/80 border border-cyan-500/30 text-cyan-400 flex items-center justify-center mb-3 shadow-[0_0_20px_rgba(6,182,212,0.2)]">
+            <div className="w-12 h-12 rounded-2xl bg-cyan-50 border border-cyan-200 text-cyan-700 flex items-center justify-center mb-3 shadow-2xs">
               <ShieldCheck className="w-6 h-6" />
             </div>
-            <h1 className="text-2xl font-bold font-heading text-white">
+            <h1 className="text-2xl font-bold font-heading text-slate-900">
               Platform Super Admin
             </h1>
-            <p className="text-xs text-slate-400 mt-1">
-              Restricted Dayflow internal operations & SaaS tenant provision plane.
+            <p className="text-xs text-slate-500 mt-1">
+              Restricted Dayflow internal operations & SaaS tenant control plane.
             </p>
           </div>
 
           {/* Quick Demo Staff Login Button */}
-          <div className="p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800 mb-6">
+          <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 mb-6">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
-                <Terminal className="w-3 h-3" /> Judge / Staff Quick Access
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                <Terminal className="w-3 h-3 text-cyan-600" /> Staff Quick Access
               </span>
-              <span className="text-[10px] font-mono text-slate-500">owner@dayflow.io</span>
+              <span className="text-[10px] font-mono text-slate-400">owner@dayflow.io</span>
             </div>
             <button
               type="button"
               onClick={handleQuickDemoAccess}
-              className="w-full py-2.5 rounded-xl bg-cyan-600/20 hover:bg-cyan-600/30 border border-cyan-500/40 text-cyan-300 hover:text-cyan-200 text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-xs"
+              className="w-full py-2.5 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-800 text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-2xs"
             >
-              <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+              <Sparkles className="w-3.5 h-3.5 text-cyan-600" />
               <span>1-Click Authenticate as Platform Owner</span>
             </button>
           </div>
@@ -113,41 +110,41 @@ export default function PlatformAdminLoginPage() {
           {/* Super Admin Credential Form */}
           <form onSubmit={handleSubmit} className="flex flex-col gap-4 text-xs">
             <div>
-              <label className="block text-slate-300 font-semibold mb-1.5">
-                Super Admin Email
+              <label className="block text-slate-700 font-semibold mb-1.5">
+                Super Admin Work Email
               </label>
               <div className="relative">
-                <Mail className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="owner@dayflow.io"
                   required
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white placeholder:text-slate-600 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 text-xs font-mono"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 text-xs font-mono"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-slate-300 font-semibold mb-1.5">
+              <label className="block text-slate-700 font-semibold mb-1.5">
                 Platform Security Key / Passphrase
               </label>
               <div className="relative">
-                <Lock className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••••••••••"
                   required
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white placeholder:text-slate-600 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 text-xs font-mono"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 text-xs font-mono"
                 />
               </div>
             </div>
 
-            <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-300 flex items-start gap-2">
-              <ShieldAlert className="w-4 h-4 shrink-0 text-amber-400 mt-0.5" />
+            <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-[11px] text-amber-900 flex items-start gap-2">
+              <ShieldAlert className="w-4 h-4 shrink-0 text-amber-600 mt-0.5" />
               <span>
                 Super Admin accounts cannot be self-registered. They are provisioned via internal backend infrastructure scripts.
               </span>
@@ -156,24 +153,24 @@ export default function PlatformAdminLoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs shadow-md transition-all hover:scale-[1.01] active:scale-[0.99] mt-2 flex items-center justify-center gap-1.5"
+              className="w-full py-3.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-xs transition-all hover:scale-[1.01] active:scale-[0.99] mt-2 flex items-center justify-center gap-1.5"
             >
               <span>{isLoading ? "Authenticating Platform Key..." : "Unlock Platform Console"}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>
 
-          <div className="mt-6 pt-4 border-t border-slate-800 text-center text-xs text-slate-500 flex items-center justify-between">
-            <Link href="/login" className="text-slate-400 hover:text-white transition-colors">
-              Client Company Login →
+          <div className="mt-6 pt-4 border-t border-slate-100 text-center text-xs text-slate-500 flex items-center justify-between">
+            <Link href="/login" className="text-cyan-700 hover:underline font-bold">
+              ← Client Company Login
             </Link>
-            <span className="text-[11px] font-mono text-slate-600">ID: SEC-DAYFLOW-01</span>
+            <span className="text-[11px] font-mono text-slate-400">ID: SEC-DAYFLOW-01</span>
           </div>
         </div>
       </main>
 
       {/* Footer */}
-      <footer className="w-full text-center py-4 text-xs text-slate-600 z-10 border-t border-slate-900">
+      <footer className="w-full text-center py-4 text-xs text-slate-400 z-10 border-t border-slate-100">
         © 2026 Dayflow Technologies Inc. • Enterprise Infrastructure & Multi-Tenant Control Plane
       </footer>
     </div>

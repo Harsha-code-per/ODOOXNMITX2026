@@ -79,6 +79,13 @@ export default function LandingPage() {
         {/* Right Floating Actions Pill */}
         <div className="pointer-events-auto flex items-center gap-2 p-1.5 rounded-2xl bg-white/80 backdrop-blur-2xl border border-white/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
           <Link
+            href="/platform-admin/login"
+            className="px-3.5 py-1.5 rounded-xl text-xs font-semibold text-cyan-800 bg-cyan-50/90 hover:bg-cyan-100 transition-colors border border-cyan-200/80"
+          >
+            Platform Admin
+          </Link>
+
+          <Link
             href="/login"
             className="px-4 py-1.5 rounded-xl text-xs font-semibold text-slate-700 hover:text-slate-900 hover:bg-slate-100 transition-colors"
           >

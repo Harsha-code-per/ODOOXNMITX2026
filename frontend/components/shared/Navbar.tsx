@@ -22,7 +22,10 @@ interface NavbarProps {
   onOpenFlowAI?: () => void;
 }
 
-export function Navbar({ onToggleSidebar, onOpenFlowAI }: NavbarProps) {
+export function Navbar({
+  onToggleSidebar,
+  onOpenFlowAI,
+}: NavbarProps) {
   const { user, logout } = useAuth();
   const [timeStr, setTimeStr] = useState<string>("");
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
@@ -63,12 +66,13 @@ export function Navbar({ onToggleSidebar, onOpenFlowAI }: NavbarProps) {
     <header className="sticky top-0 z-40 w-full bg-white/90 backdrop-blur-xl border-b border-slate-200/80 px-4 sm:px-6 py-2.5 transition-all shadow-xs">
       <div className="flex items-center justify-between gap-4">
         {/* Left: Mobile Toggle & Clean Brand Logo */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
+          {/* Mobile Drawer Trigger (only on small screens) */}
           {onToggleSidebar && (
             <button
               onClick={onToggleSidebar}
               className="lg:hidden p-2 rounded-xl hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition-colors"
-              aria-label="Toggle navigation"
+              aria-label="Toggle navigation drawer"
             >
               <Menu className="w-5 h-5" />
             </button>
@@ -87,11 +91,11 @@ export function Navbar({ onToggleSidebar, onOpenFlowAI }: NavbarProps) {
           </Link>
         </div>
 
-        {/* Center: Live Clock & FlowAI Search bar */}
+        {/* Center: FlowAI Search bar */}
         <div className="hidden md:flex items-center gap-3 flex-1 max-w-md mx-4">
           <button
             onClick={onOpenFlowAI}
-            className="w-full flex items-center justify-between px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-xs text-slate-600 hover:text-slate-900 transition-all group"
+            className="w-full flex items-center justify-between px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-xs text-slate-600 hover:text-slate-900 transition-all group shadow-2xs"
           >
             <span className="flex items-center gap-2">
               <Sparkles className="w-3.5 h-3.5 text-cyan-600 group-hover:rotate-12 transition-transform" />
@@ -103,10 +107,10 @@ export function Navbar({ onToggleSidebar, onOpenFlowAI }: NavbarProps) {
           </button>
         </div>
 
-        {/* Right Actions: Clock, Notifications, Profile Menu */}
-        <div className="flex items-center gap-2.5 sm:gap-3">
-          {/* Live Clock Badge */}
-          <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200 text-xs font-mono font-bold text-slate-800">
+        {/* Right: Clock, Notifications & User Profile */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          {/* Live Session Stopwatch Clock */}
+          <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 text-xs font-mono font-medium">
             <Clock className="w-3.5 h-3.5 text-cyan-600" />
             <span>{timeStr || "09:00:00 AM"}</span>
           </div>
@@ -114,56 +118,56 @@ export function Navbar({ onToggleSidebar, onOpenFlowAI }: NavbarProps) {
           {/* Notifications Dropdown */}
           <div className="relative">
             <button
-              onClick={() => setShowNotifDropdown(!showNotifDropdown)}
-              className="relative p-2 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 transition-all"
-              aria-label="Notifications"
+              onClick={() => {
+                setShowNotifDropdown(!showNotifDropdown);
+                setShowUserDropdown(false);
+              }}
+              className="relative p-2 rounded-xl hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition-colors"
+              aria-label="View notifications"
             >
               <Bell className="w-4 h-4" />
               {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-cyan-600 text-[9px] font-bold text-white shadow-sm">
+                <span className="absolute top-1.5 right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-cyan-600 text-[9px] font-bold text-white shadow-xs">
                   {unreadCount}
                 </span>
               )}
             </button>
 
+            {/* Notification Popup */}
             {showNotifDropdown && (
-              <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-2xl glass-panel border border-slate-200 shadow-xl p-3 z-50 animate-in fade-in slide-in-from-top-2">
-                <div className="flex items-center justify-between pb-2 border-b border-slate-200 mb-2 px-1">
-                  <h4 className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
-                    <Bell className="w-3.5 h-3.5 text-cyan-600" /> Notifications
-                  </h4>
+              <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-2xl bg-white border border-slate-200 shadow-2xl p-4 z-50 animate-in fade-in zoom-in-95">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                  <span className="text-xs font-bold font-heading text-slate-900">
+                    Notifications ({unreadCount} new)
+                  </span>
                   {unreadCount > 0 && (
                     <button
                       onClick={markAllRead}
-                      className="text-[10px] text-cyan-700 hover:underline font-semibold"
+                      className="text-[11px] text-cyan-600 hover:underline font-semibold"
                     >
                       Mark all as read
                     </button>
                   )}
                 </div>
 
-                <div className="flex flex-col gap-1.5 max-h-72 overflow-y-auto">
+                <div className="mt-3 flex flex-col gap-2.5 max-h-72 overflow-y-auto">
                   {notifications.length === 0 ? (
-                    <div className="text-center py-6 text-xs text-slate-400">
-                      No notifications at the moment.
-                    </div>
+                    <p className="text-xs text-slate-400 text-center py-4">No notifications yet</p>
                   ) : (
-                    notifications.map((n) => (
+                    notifications.map((item) => (
                       <div
-                        key={n.id}
-                        className={`p-2.5 rounded-xl text-xs transition-colors border ${
-                          n.isRead
-                            ? "bg-slate-50 border-slate-100 text-slate-500"
-                            : "bg-cyan-50/70 border-cyan-200 text-slate-800 font-medium"
+                        key={item.id}
+                        className={`p-3 rounded-xl border text-xs transition-all ${
+                          item.isRead
+                            ? "bg-slate-50/50 border-slate-100 text-slate-600"
+                            : "bg-cyan-50/60 border-cyan-100 text-slate-900 font-medium"
                         }`}
                       >
-                        <div className="flex items-center justify-between gap-1 mb-0.5">
-                          <span className="font-bold text-slate-900">{n.title}</span>
-                          {!n.isRead && (
-                            <span className="w-2 h-2 rounded-full bg-cyan-500" />
-                          )}
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="font-semibold text-slate-900">{item.title}</span>
+                          <span className="text-[10px] text-slate-400">Just now</span>
                         </div>
-                        <p className="text-[11px] leading-relaxed text-slate-600">{n.message}</p>
+                        <p className="text-[11px] text-slate-600 leading-relaxed">{item.message}</p>
                       </div>
                     ))
                   )}
@@ -172,71 +176,83 @@ export function Navbar({ onToggleSidebar, onOpenFlowAI }: NavbarProps) {
             )}
           </div>
 
-          {/* User Profile Menu */}
-          {user ? (
-            <div className="relative">
-              <button
-                onClick={() => setShowUserDropdown(!showUserDropdown)}
-                className="flex items-center gap-2 p-1.5 rounded-xl hover:bg-slate-100 transition-colors group border border-transparent hover:border-slate-200"
-              >
-                <AvatarBadge
-                  name={`${user.employee.firstName} ${user.employee.lastName}`}
-                  department={user.employee.department}
-                  size="sm"
-                  status={user.employee.status}
-                  showStatus
-                />
-                <div className="hidden lg:flex flex-col text-left">
-                  <span className="text-xs font-bold text-slate-900 leading-none flex items-center gap-1">
-                    {user.employee.firstName} {user.employee.lastName}
-                  </span>
-                  <span className="text-[10px] text-cyan-700 leading-none mt-1 font-semibold">
-                    {user.role === "ADMIN" ? "Super Admin" : user.role === "HR" ? "HR Director" : "Employee"}
+          {/* User Profile Pill & Dropdown */}
+          <div className="relative">
+            <button
+              onClick={() => {
+                setShowUserDropdown(!showUserDropdown);
+                setShowNotifDropdown(false);
+              }}
+              className="flex items-center gap-2.5 p-1.5 pr-3 rounded-2xl hover:bg-slate-100 transition-colors border border-transparent hover:border-slate-200"
+            >
+              <AvatarBadge
+                name={`${user?.employee?.firstName || "Alex"} ${user?.employee?.lastName || "Rivera"}`}
+                department={user?.employee?.department || "Engineering"}
+                size="sm"
+              />
+
+              <div className="hidden sm:flex flex-col text-left">
+                <span className="text-xs font-bold text-slate-900 leading-tight">
+                  {user?.employee?.firstName} {user?.employee?.lastName}
+                </span>
+                <span className="text-[10px] text-cyan-600 font-semibold leading-tight capitalize">
+                  {user?.role === "ADMIN" ? "Company Admin" : user?.role === "SUPER_ADMIN" ? "Super Admin" : user?.role === "HR" ? "HR Lead" : "Staff"}
+                </span>
+              </div>
+
+              <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+            </button>
+
+            {/* User Profile Dropdown Menu */}
+            {showUserDropdown && (
+              <div className="absolute right-0 mt-2 w-56 rounded-2xl bg-white border border-slate-200 shadow-2xl p-2 z-50 animate-in fade-in zoom-in-95">
+                <div className="px-3 py-2.5 border-b border-slate-100">
+                  <p className="text-xs font-bold text-slate-900">
+                    {user?.employee?.firstName} {user?.employee?.lastName}
+                  </p>
+                  <p className="text-[11px] text-slate-500 truncate">{user?.email}</p>
+                  <span className="inline-block mt-1.5 px-2 py-0.5 rounded-full text-[9px] font-bold bg-cyan-50 text-cyan-800 border border-cyan-200 uppercase tracking-wider">
+                    {user?.role} Access
                   </span>
                 </div>
-                <ChevronDown className="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-700" />
-              </button>
 
-              {showUserDropdown && (
-                <div className="absolute right-0 mt-2 w-56 rounded-2xl glass-panel border border-slate-200 shadow-2xl p-2 z-50 animate-in fade-in slide-in-from-top-2">
-                  <div className="px-3 py-2 border-b border-slate-100 mb-1">
-                    <p className="text-xs font-bold text-slate-900">
-                      {user.employee.firstName} {user.employee.lastName}
-                    </p>
-                    <p className="text-[11px] text-slate-500 truncate">{user.email}</p>
-                    <div className="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-cyan-50 text-cyan-800 text-[10px] font-bold border border-cyan-200">
-                      <Shield className="w-3 h-3" /> {user.employee.designation}
-                    </div>
-                  </div>
-
+                <div className="py-1">
                   <Link
-                    href={user.role === "EMPLOYEE" ? "/dashboard/employee/profile" : "/dashboard/admin/employees"}
+                    href="/dashboard/employee/profile"
                     onClick={() => setShowUserDropdown(false)}
-                    className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium text-slate-700 hover:bg-slate-100 hover:text-cyan-700 transition-colors"
+                    className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 rounded-xl transition-colors"
                   >
-                    <User className="w-3.5 h-3.5 text-cyan-600" /> My Profile
+                    <User className="w-3.5 h-3.5 text-cyan-600" />
+                    <span>My Profile</span>
                   </Link>
 
+                  {(user?.role === "ADMIN" || user?.role === "HR") && (
+                    <Link
+                      href="/dashboard/admin"
+                      onClick={() => setShowUserDropdown(false)}
+                      className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 rounded-xl transition-colors"
+                    >
+                      <Shield className="w-3.5 h-3.5 text-cyan-600" />
+                      <span>Admin Hub</span>
+                    </Link>
+                  )}
+                </div>
+
+                <div className="pt-1 border-t border-slate-100">
                   <button
                     onClick={() => {
-                      setShowUserDropdown(false);
                       logout();
+                      setShowUserDropdown(false);
                     }}
-                    className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-rose-600 hover:bg-rose-50 transition-colors text-left"
+                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 rounded-xl transition-colors"
                   >
-                    <LogOut className="w-3.5 h-3.5" /> Sign Out
+                    <LogOut className="w-3.5 h-3.5" />
+                    <span>Sign Out</span>
                   </button>
                 </div>
-              )}
-            </div>
-          ) : (
-            <Link
-              href="/login"
-              className="px-3.5 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold shadow-xs transition-all"
-            >
-              Sign In
-            </Link>
-          )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </header>
