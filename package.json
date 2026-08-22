@@ -1,0 +1,15 @@
+{
+  "name": "dayflow-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Dayflow — Next-Gen Human Resource Management System (Odoo × NMIT Hackathon 2026)",
+  "scripts": {
+    "dev:frontend": "pnpm --filter frontend dev",
+    "build:frontend": "pnpm --filter frontend build",
+    "dev:backend": "cd backend && uv run uvicorn app.main:app --reload --port 8000",
+    "dev": "pnpm dev:frontend"
+  },
+  "keywords": ["hrms", "odoo", "hackathon", "nextjs", "fastapi", "supabase"],
+  "author": "Dayflow Team",
+  "license": "MIT"
+}
