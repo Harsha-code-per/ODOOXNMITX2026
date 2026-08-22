@@ -18,8 +18,8 @@ def _sanitize_msg(msg: Any) -> str:
 
 class EmailService:
     def __init__(self, api_key: Optional[str] = None, sender_email: Optional[str] = None):
-        self.api_key = api_key or settings.RESEND_API_KEY
-        self.sender = sender_email or settings.EMAIL_FROM
+        self.api_key = settings.RESEND_API_KEY if api_key is None else api_key
+        self.sender = settings.EMAIL_FROM if sender_email is None else sender_email
         if self.api_key:
             resend.api_key = self.api_key
 
