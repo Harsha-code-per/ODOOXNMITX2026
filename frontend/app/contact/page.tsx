@@ -78,7 +78,7 @@ export default function ContactPricingPage() {
 
         <div className="pointer-events-auto flex items-center gap-2 p-1.5 rounded-2xl bg-white/85 backdrop-blur-2xl border border-white/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
           <Link
-            href="/platform-admin"
+            href="/platform-admin/login"
             className="px-3.5 py-1.5 rounded-xl text-xs font-semibold text-cyan-800 bg-cyan-50 hover:bg-cyan-100 transition-colors border border-cyan-200"
           >
             Platform Admin
@@ -495,7 +495,7 @@ export default function ContactPricingPage() {
             <Link href="/login" className="hover:text-slate-900 transition-colors">
               Sign In
             </Link>
-            <Link href="/platform-admin" className="hover:text-cyan-700 font-semibold transition-colors">
+            <Link href="/platform-admin/login" className="hover:text-cyan-700 font-semibold transition-colors">
               Platform Admin
             </Link>
           </div>

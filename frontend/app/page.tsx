@@ -482,7 +482,7 @@ export default function LandingPage() {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/platform-admin" className="hover:text-cyan-700 font-semibold transition-colors">
+                  <Link href="/platform-admin/login" className="hover:text-cyan-700 font-semibold transition-colors">
                     Platform Super Admin
                   </Link>
                 </li>
