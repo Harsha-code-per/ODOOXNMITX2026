@@ -7,11 +7,12 @@
 [![React](https://img.shields.io/badge/React-19.2+-61DAFB.svg?style=for-the-badge&logo=react&logoColor=black)](https://react.dev)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-3178C6.svg?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-06B6D4.svg?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
-[![Framer Motion](https://img.shields.io/badge/Framer_Motion-13.0+-FF0055.svg?style=for-the-badge&logo=framer&logoColor=white)](https://www.framer.com/motion/)
+[![Three.js](https://img.shields.io/badge/Three.js-WebGL_3D-black.svg?style=for-the-badge&logo=three.js&logoColor=white)](https://threejs.org)
+[![Recharts](https://img.shields.io/badge/Recharts-v3.10-22c55e.svg?style=for-the-badge&logo=d3.js&logoColor=white)](https://recharts.org)
 [![Radix UI](https://img.shields.io/badge/Radix_UI-Primitives-161618.svg?style=for-the-badge&logo=radix-ui&logoColor=white)](https://www.radix-ui.com)
 
-**Theme**: Cyber Cyan (`#06B6D4`) Dual-Themed (Dark Luxe & Crisp Light)  
-**Responsive Core**: Fluid REM Architecture (Mobile, Tablet, Laptop & 4K)  
+**Design Architecture**: Unified Light Studio with Responsive 3D WebGL Canvas  
+**Layout Engine**: Fixed-Viewport Shell with Collapsible Rail Sidebar (`Ctrl+B`)  
 **Deployment Target**: Vercel
 
 </div>
@@ -20,234 +21,210 @@
 
 ## 📑 Table of Contents
 
-- [Executive Overview](#-executive-overview)
-- [Key User Interfaces & Modules](#-key-user-interfaces--modules)
-- [Design System & Fluid REM Architecture](#-design-system--fluid-rem-architecture)
-- [Tech Stack & Architecture](#-tech-stack--architecture)
+- [Overview](#-overview)
+- [Interactive Component Highlights](#-interactive-component-highlights)
+- [Complete 22-Route Sitemap](#-complete-22-route-sitemap)
+- [Design System & Layout Architecture](#-design-system--layout-architecture)
+- [Tech Stack](#-tech-stack)
 - [Project Directory Structure](#-project-directory-structure)
 - [Environment Variables](#-environment-variables)
-- [Getting Started & Development](#-getting-started--development)
-- [Dual Data Engine: Real API vs Mock Mode](#-dual-data-engine-real-api-vs-mock-mode)
-- [PDF Payslip Generation Engine](#-pdf-payslip-generation-engine)
-- [Production Deployment](#-production-deployment)
+- [Getting Started & Local Development](#-getting-started--local-development)
+- [Dual Data Engine: Real Backend vs Mock Mode](#-dual-data-engine-real-backend-vs-mock-mode)
+- [Statutory PDF Payslip Generation](#-statutory-pdf-payslip-generation)
+- [Production Deployment to Vercel](#-production-deployment-to-vercel)
 
 ---
 
-## 🌟 Executive Overview
+## 🌟 Overview
 
-The **Dayflow Frontend** is a modern, responsive web application engineered with **Next.js 16 (App Router)**, **React 19**, **TypeScript**, and **Tailwind CSS v4**. It delivers an intuitive, micro-animated user experience for both employees and HR leaders with fluid typography, real-time stopwatch session counters, dynamic wage matrix recalculations, and 1-click statutory PDF payslip generation.
+The **Dayflow Frontend** is a modern, responsive web application engineered with **Next.js 16 (Turbopack)**, **React 19**, **TypeScript**, and **Tailwind CSS v4**. It delivers an intuitive user experience for employees, HR directors, company founders, and platform operations staff with fluid typography, real-time stopwatch session counters, dynamic wage matrix recalculations, interactive flowcharts, Recharts attendance graphs, and real-time leave Kanban boards.
+
+---
+
+## ⚡ Interactive Component Highlights
+
+### 1. 🔄 Workforce Architecture Flowchart ([`WorkforceFlowchart.tsx`](components/dashboard/WorkforceFlowchart.tsx))
+- **6-Stage SaaS Lifecycle**:
+  1. *SaaS Tenant Provisioning* (`Platform Owner`)
+  2. *Founder 1st Login Reset* (`Zero-Trust Handover`)
+  3. *HR Director Role Setup* (`Sarah Jenkins`)
+  4. *Staff Directory Pipeline* (`11 Active Staff`)
+  5. *Biometrics & Attendance Sync* (`91% Presence Velocity`)
+  6. *Automated Payroll Engine* (`₹10.31L Batch`)
+- **Click-to-Inspect**: Clicking any node opens a live telemetry inspection drawer with subsystem status and direct navigation.
+
+### 2. 📋 Real-Time Leave Governance Kanban Board ([`LeaveKanbanBoard.tsx`](components/dashboard/LeaveKanbanBoard.tsx))
+- Multi-column board: 🟡 **Pending Review** | 🟢 **Approved & Active** | 🔴 **Rejected / Declined**.
+- 1-Click quick approval with celebration confetti (`canvas-confetti`) and real-time state synchronization.
+- Filter pills by leave category (`ALL`, `PAID`, `SICK`, `UNPAID`) and search indexing.
+
+### 3. 📈 Attendance Velocity Recharts Visualizer ([`AttendanceVelocityChart.tsx`](components/dashboard/AttendanceVelocityChart.tsx))
+- Multi-period data switches (`This Week`, `Monthly`).
+- Dual visual styles: **Area Trend** (gradient shading) and **Bar Grid**.
+- Rich hover tooltips with presence rates, on-duty headcount, and late arrivals.
+
+### 4. ⏱️ Employee Shift Progress Ring & Stopwatch ([`ShiftProgressRing.tsx`](components/dashboard/ShiftProgressRing.tsx))
+- Animated circular SVG gauge tracking live shift percentage against an 8-hour target.
+- 1-Click **Punch In / Punch Out** stopwatch with live duration timer.
+- Visual leave quota balances with a direct "Apply for Time-Off" modal trigger.
+
+### 5. 🎛️ Fixed-Viewport Shell & Collapsible Rail Sidebar ([`Sidebar.tsx`](components/shared/Sidebar.tsx))
+- Fixed-viewport architecture (`h-screen overflow-hidden`) locking the top navbar and left sidebar while isolating content scrolling to `<main>`.
+- Sidebar smoothly toggles between expanded full width (`256px`) and compact icon rail (`72px`) with floating hover tooltips.
+- Keyboard shortcut `Ctrl + B` (or `Cmd + B`) and `localStorage` persistence.
+
+---
+
+## 🗺️ Complete 22-Route Sitemap
 
 ```
-┌──────────────────────────────────────────────────────────────────────────────────────────┐
-│                                   FRONTEND CORE HIGHLIGHTS                               │
-├──────────────────────────┬───────────────────────────────────────────────────────────────┤
-│ 1. 1-CLICK DEMO BAR      │ Sticky top bar for judges to switch personas seamlessly       │
-│                          │ between Sarah (HR), Alex (Lead Dev), and Arthur (CEO).        │
-├──────────────────────────┼───────────────────────────────────────────────────────────────┤
-│ 2. LIVE ATTENDANCE PULSE │ Stopwatch session counter with live presence indicators,      │
-│                          │ half-day thresholds, and one-tap clock-in/out.                │
-├──────────────────────────┼───────────────────────────────────────────────────────────────┤
-│ 3. DYNAMIC WAGE MATRIX   │ Real-time wage adjustment UI reflecting instant Basic (50%),  │
-│                          │ HRA, Allowances, PF, PT, and Take-Home recalculations.        │
-├──────────────────────────┼───────────────────────────────────────────────────────────────┤
-│ 4. STATUTORY PDF PAYSLIP │ Branded, client-side downloadable PDF payslips formatted with │
-│                          │ company watermark, statutory components, and proration info.   │
-├──────────────────────────┼───────────────────────────────────────────────────────────────┤
-│ 5. FLUID REM ARCHITECTURE│ Scalable CSS clamp() typography ensuring flawless layouts     │
-│                          │ from 360px smartphones to 4K Ultra-HD displays.               │
-└──────────────────────────┴───────────────────────────────────────────────────────────────┘
+Route (app)                              Description
+┌ ○ /                                    3D WebGL Particle Hero Landing Page
+├ ○ /contact                             SaaS Pricing Tiers & Client Inquiries Form
+├ ○ /login                               Client Workspace Sign In & Persona Quick Access
+├ ○ /signup                              New Workspace User Registration
+├ ○ /force-password-reset                Zero-Trust Forced 1st-Login Password Reset Gate
+├ ○ /platform-admin                      Platform Super Admin Tenant Control Plane
+├ ○ /platform-admin/login                Dedicated Platform Operations Login Gate
+│
+├ ○ /dashboard/admin                     HR Command Center (Pulse, Kanban, Flowchart)
+├ ○ /dashboard/admin/analytics           Executive Intelligence, Headcount & Cost Charts
+├ ○ /dashboard/admin/attendance          Company-Wide Daily & Weekly Attendance Matrix
+├ ○ /dashboard/admin/employees           Staff Directory, Search & Onboarding Drawer
+├ ○ /dashboard/admin/leaves              Leave Approvals & Decision Review Queue
+├ ○ /dashboard/admin/payroll             Automated Payroll Engine & Salary Ledger
+│
+├ ○ /dashboard/employee                  Employee Self-Service (Stopwatch, Shift Ring)
+├ ○ /dashboard/employee/attendance       Personal Attendance Calendar & Work Sessions
+├ ○ /dashboard/employee/leaves           Leave Quota Application & History
+├ ○ /dashboard/employee/payroll          Statutory Payslip Breakdown & Vector PDF Viewer
+├ ○ /dashboard/employee/profile          Personal Profile, Job Details & Documents Hub
+└ ○ /_not-found                          Custom 404 Error Page
 ```
 
 ---
 
-## 🖥️ Key User Interfaces & Modules
+## 🎨 Design System & Layout Architecture
 
-### 1. 🌐 Cinematic Landing & Bento Grid (`/`)
-- High-impact visual hero with Cyber Cyan (`#06B6D4`) glow aesthetics.
-- Interactive Bento Grid highlighting dynamic payroll, attendance telemetry, and leave governance.
-- 1-Click Judge Persona access directly from the hero header.
-
-### 2. 👨‍💻 Employee Self-Service Portal (`/dashboard/employee`)
-- **Live Attendance Card**: Real-time ticking work session timer, one-click Clock-In/Clock-Out, and daily presence badges.
-- **Leave Balances & Request Widget**: Visual quota rings for `PAID (18)`, `SICK (10)`, `CASUAL (6)`, and `UNPAID (0)`.
-- **Salary Breakdown & PDF Export**: Transparent view of monthly base wage, itemized earnings, deductions, and 1-click official PDF payslip download.
-
-### 3. 👩‍💼 HR Command Center (`/dashboard/admin`)
-- **Executive KPI Dashboard**: Live headcount, present today, absent today, employees on leave, and monthly payroll burn rate.
-- **Employee Directory (`/dashboard/admin/employees`)**: Searchable, filterable staff roster with department tags, role chips, and View-As inspector.
-- **Company Attendance Grid (`/dashboard/admin/attendance`)**: Multi-department live attendance board with status filters (`PRESENT`, `ABSENT`, `HALF_DAY`, `ON_LEAVE`).
-- **Urgent Leave Review Queue (`/dashboard/admin/leaves`)**: 1-click Approve and Reject controls with automatic attendance calendar synchronization.
-- **Dynamic Salary Matrix (`/dashboard/admin/payroll`)**: Instant wage editor triggering automatic component recalculations across all employee tiers.
-- **Executive Analytics (`/dashboard/admin/analytics`)**: Recharts-powered department cost distribution and 5-day attendance velocity charts.
-
----
-
-## 🎨 Design System & Fluid REM Architecture
-
-Dayflow utilizes a **Fluid REM Typography & Spacing System** designed to scale proportionally across any viewport without layout shifts:
+Dayflow utilizes a **Unified Light Studio Design System** tailored for high readability and enterprise aesthetics:
 
 ```css
-/* Fluid Typography & Root Scaling */
-:root {
-  font-size: clamp(14px, 0.85rem + 0.35vw, 18px);
-}
-
-/* Fluid Container Sizing */
-.fluid-container {
-  width: 100%;
-  max-width: clamp(320px, 92vw, 1600px);
-  margin-left: auto;
-  margin-right: auto;
-  padding-left: clamp(1rem, 2vw, 2.5rem);
-  padding-right: clamp(1rem, 2vw, 2.5rem);
-}
+/* Core Color Tokens */
+--background: #fafafc;      /* Crisp Studio Light */
+--foreground: #0f172a;      /* Deep Slate Typography */
+--primary: #0891b2;         /* Cyan Accent */
+--card-bg: #ffffff;         /* Pure White Glass Panels */
+--border-subtle: #e2e8f0;   /* Slate 200 Borders */
 ```
 
-- **Primary Accent**: Cyber Cyan (`#06B6D4`) with luminous gradient overlays.
-- **Dual Themes**: Fully integrated Dark Luxe (`#0B0F17`) and Crisp Light (`#F8FAFC`) with smooth CSS transitions.
-- **Accessible Touch Targets**: Minimum 44px interactive touch targets across mobile viewports.
-
 ---
 
-## 📦 Tech Stack & Architecture
+## 💻 Tech Stack
 
-- **Framework**: Next.js 16.3 (App Router)
-- **UI Library**: React 19.2
+- **Framework**: Next.js 16.3.1 (App Router & Turbopack)
+- **UI Runtime**: React 19.2.8
 - **Language**: TypeScript 5.0+
-- **Styling**: Tailwind CSS v4 + Vanilla CSS Fluid System
-- **Icons**: Lucide React
-- **Animations**: Framer Motion
-- **Data Visualization**: Recharts
+- **Styling**: Tailwind CSS v4
+- **3D Graphics**: Three.js WebGL Particle Mesh
+- **Charting**: Recharts 3.10
 - **PDF Generation**: jsPDF
-- **Notifications & Modals**: Sonner + Radix UI Primitives
-- **Package Manager**: `pnpm`
+- **Micro-Animations & Effects**: Canvas Confetti, Lucide Icons, Sonner Notifications
 
 ---
 
-## 📂 Project Directory Structure
+## 📁 Project Directory Structure
 
 ```
 frontend/
-├── app/                                   # Next.js App Router Routes
-│   ├── page.tsx                           # Cinematic Landing Page with Bento Showcase
-│   ├── layout.tsx                         # Root Layout with Theme & Auth Providers
-│   ├── globals.css                        # Design system tokens & fluid REM clamp() styles
-│   ├── login/                             # Login Page with Persona Quick-Select
-│   ├── signup/                            # Registration Page
-│   └── dashboard/                         # Protected Application Routes
-│       ├── layout.tsx                     # Dashboard Navigation Shell & Persona Bar
-│       ├── employee/                      # Employee Self-Service Portal
-│       └── admin/                         # HR Admin Command Center
-│           ├── page.tsx                   # Overview KPI Command Center
-│           ├── employees/                 # Employee Directory & Profiles
-│           ├── attendance/                # Company-Wide Attendance Matrix
-│           ├── leaves/                    # Leave Approval & Review Queue
-│           ├── payroll/                   # Dynamic Salary Matrix & Wage Editor
-│           └── analytics/                 # Executive Analytics & Charts
+├── app/
+│   ├── contact/                         # Pricing & Inquiries
+│   ├── dashboard/
+│   │   ├── admin/                       # HR Command Center views
+│   │   └── employee/                    # Employee Self-Service views
+│   ├── force-password-reset/            # Forced Reset Security Gate
+│   ├── login/                           # Client Authentication
+│   ├── platform-admin/                  # Super Admin Operations
+│   │   └── login/                       # Dedicated Super Admin Gate
+│   ├── signup/                          # Registration
+│   ├── layout.tsx                       # Root Layout
+│   └── page.tsx                         # 3D Landing Page
 │
-├── components/                            # Modular React UI Components
-│   ├── attendance/                        # Attendance stopwatch, status badges, log tables
-│   ├── employees/                         # Staff cards, employee forms, avatar uploaders
-│   ├── leaves/                            # Leave balance rings, application modals, review cards
-│   ├── payroll/                           # Salary breakdown cards, wage slider, payslip viewer
-│   └── shared/                            # Sticky Persona Demo Bar, Glass Sidebar, Navbar
+├── components/
+│   ├── attendance/                      # Matrix & Stopwatch components
+│   ├── dashboard/                       # Flowchart, Kanban, Velocity Chart, Shift Ring
+│   ├── leaves/                          # Leave Approval Drawer & Apply Modal
+│   ├── payroll/                         # Payslip Modal & Dynamic Salary Editor
+│   └── shared/                          # Persona Demo Bar, Sidebar, Navbar, FlowAI
 │
-├── lib/                                   # Client Logic, State & Utilities
-│   ├── api.ts                             # Unified DayflowApiClient (REST + Mock fallback)
-│   ├── auth-context.tsx                   # Authentication Context & Session Provider
-│   ├── theme-context.tsx                  # Dark/Light Theme Switcher Provider
-│   ├── mock-data.ts                       # High-fidelity mock state with 11 demo personas
-│   ├── pdf-generator.ts                   # Client-side statutory PDF payslip engine (jsPDF)
-│   ├── salary-calculator.ts               # Dynamic wage formula & payable days engine
-│   └── utils.ts                           # Tailwind class merging (clsx + twMerge)
+├── lib/
+│   ├── api.ts                           # Unified API Client (Mock & Backend)
+│   ├── auth-context.tsx                 # Multi-Persona Auth Context
+│   ├── mock-data.ts                     # Enterprise Mock Dataset & State Store
+│   ├── salary-calculator.ts             # Statutory Salary Engine
+│   └── utils.ts                         # Formatters & Helpers
 │
-├── public/                                # Static images, icons, and branding assets
-├── package.json                           # Managed with pnpm
-└── tsconfig.json                          # TypeScript configuration
+├── package.json                         # Dependencies & Scripts
+└── README.md                            # Frontend Documentation
 ```
 
 ---
 
-## ⚙️ Environment Variables
+## 🔧 Environment Variables
 
-Create a `.env.local` file in `frontend/`:
+Create a `.env.local` file in the `frontend/` root:
 
-```env
-# URL pointing to the FastAPI backend service
+```bash
+# Set to 'false' to connect to live FastAPI backend, or 'true' for standalone mock mode
+NEXT_PUBLIC_USE_MOCK=true
+
+# Live Backend REST API Base URL
 NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
-
-# Set to "false" to connect to real FastAPI backend.
-# Set to "true" for standalone offline browser demo with LocalStorage persistence.
-NEXT_PUBLIC_USE_MOCK=false
 ```
 
 ---
 
-## 🚀 Getting Started & Development
+## 🚀 Getting Started & Local Development
 
-### 1. Install Dependencies
 ```bash
-cd frontend
+# 1. Install dependencies
 pnpm install
-```
 
-### 2. Run Local Development Server
-```bash
+# 2. Run local development server
 pnpm dev
-```
-Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-### 3. Build for Production
-```bash
+# 3. Build for production
 pnpm build
-pnpm start
 ```
 
-### 4. Lint Codebase
+Open **[http://localhost:3000](http://localhost:3000)** in your browser.
+
+---
+
+## 📄 Statutory PDF Payslip Generation
+
+The client-side PDF payslip engine (`components/payroll/PayslipModal.tsx`) compiles professional vector PDF salary statements directly in the browser:
+- Header with company identity, logo, and pay period.
+- Employee metadata (Designation, Department, Bank Account, PAN/ID).
+- Itemized earnings (Basic, HRA, Allowances) and deductions (PF, Professional Tax).
+- Net take-home salary in INR formatted words and figures with official authorization stamp.
+
+---
+
+## 🚢 Production Deployment to Vercel
+
 ```bash
-pnpm lint
+# Deploy with Vercel CLI
+npx vercel --prod
 ```
 
----
-
-## 🔄 Dual Data Engine: Real API vs Mock Mode
-
-The frontend includes a **Dual-Mode API Client** ([`lib/api.ts`](file:///home/cholan0415/ODOOXNMITX2026/frontend/lib/api.ts)):
-
-1. **Connected Mode (`NEXT_PUBLIC_USE_MOCK=false`)**:
-   - Makes standard `fetch` requests with `Authorization: Bearer <token>` to the FastAPI backend (`http://localhost:8000/api/v1`).
-2. **Autonomous Offline Mode (`NEXT_PUBLIC_USE_MOCK=true`)**:
-   - Operates with zero external network dependencies using a high-fidelity `localStorage` state manager pre-seeded with 11 realistic employees, attendance records, and leave requests.
-   - Ideal for offline judge evaluations and presentations.
-
----
-
-## 📄 PDF Payslip Generation Engine
-
-The payslip engine ([`lib/pdf-generator.ts`](file:///home/cholan0415/ODOOXNMITX2026/frontend/lib/pdf-generator.ts)) generates client-side, branded PDF documents containing:
-- Company Header & Watermark branding.
-- Employee Details (Name, Employee ID, Department, Designation, Joining Date).
-- Statutory Itemized Earnings (Basic, HRA, Standard Allowance, Performance Bonus, LTA, Fixed Allowance).
-- Statutory Deductions (Provident Fund, Professional Tax).
-- Prorated Attendance Summary ($\text{Payable Days} / \text{Working Days}$) and Effective Net Take-Home Pay.
-
----
-
-## 🌐 Production Deployment
-
-### Deploying to Vercel
-1. Push your code to GitHub.
-2. Import the repository in [Vercel](https://vercel.com).
-3. Set the **Root Directory** to `frontend`.
-4. Configure environment variables:
-   - `NEXT_PUBLIC_API_URL`: `https://your-backend-service.onrender.com/api/v1`
-   - `NEXT_PUBLIC_USE_MOCK`: `false`
-5. Click **Deploy**.
+Or connect your GitHub repository directly to Vercel:
+1. **Framework Preset**: Next.js
+2. **Root Directory**: `frontend`
+3. **Build Command**: `next build`
+4. **Output Directory**: `.next`
 
 ---
 
 <div align="center">
-
-**Dayflow HRMS Frontend** — Crafted with precision for the **Odoo × NMIT Hackathon 2026**
-
+  <p>© 2026 Dayflow Technologies Inc. • Frontend Architecture Guide</p>
 </div>
