@@ -19,6 +19,7 @@ import {
   Wallet,
   CheckCircle2,
 } from "lucide-react";
+import { AvatarBadge } from "@/components/shared/AvatarBadge";
 
 export default function EmployeeProfilePage() {
   const { user } = useAuth();
@@ -34,14 +35,13 @@ export default function EmployeeProfilePage() {
       {/* Header Profile Card */}
       <div className="p-6 rounded-3xl glass-panel border border-cyan-500/30 cyan-glow-subtle flex flex-wrap items-center justify-between gap-6 relative overflow-hidden">
         <div className="flex items-center gap-5">
-          <div className="w-20 h-20 rounded-2xl overflow-hidden border-2 border-cyan-500/60 shadow-xl shadow-cyan-500/25 bg-slate-800 flex items-center justify-center text-2xl font-bold text-cyan-300">
-            {employee.avatarUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={employee.avatarUrl} alt={employee.firstName} className="w-full h-full object-cover" />
-            ) : (
-              <span>{employee.firstName[0]}</span>
-            )}
-          </div>
+          <AvatarBadge
+            name={`${employee.firstName} ${employee.lastName}`}
+            department={employee.department}
+            size="xl"
+            status={employee.status}
+            showStatus
+          />
           <div>
             <div className="flex items-center gap-2.5">
               <h1 className="text-2xl font-bold font-heading">

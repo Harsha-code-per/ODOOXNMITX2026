@@ -16,6 +16,7 @@ import {
   Users,
 } from "lucide-react";
 import { toast } from "sonner";
+import { AvatarBadge } from "@/components/shared/AvatarBadge";
 
 export default function AdminAttendancePage() {
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -167,14 +168,13 @@ export default function AdminAttendancePage() {
               {filteredMatrix.map((item) => (
                 <tr key={item.employee.id} className="hover:bg-slate-800/20 transition-colors">
                   <td className="py-3 flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-full overflow-hidden border border-slate-700 bg-slate-800 flex items-center justify-center font-bold text-cyan-300">
-                      {item.employee.avatarUrl ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={item.employee.avatarUrl} alt={item.employee.firstName} className="w-full h-full object-cover" />
-                      ) : (
-                        <span>{item.employee.firstName[0]}</span>
-                      )}
-                    </div>
+                    <AvatarBadge
+                      name={`${item.employee.firstName} ${item.employee.lastName}`}
+                      department={item.employee.department}
+                      size="sm"
+                      status={item.status}
+                      showStatus
+                    />
                     <div>
                       <span className="font-bold text-slate-200 block">
                         {item.employee.firstName} {item.employee.lastName}

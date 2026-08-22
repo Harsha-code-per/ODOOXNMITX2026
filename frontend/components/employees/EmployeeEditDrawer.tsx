@@ -7,6 +7,7 @@ import { useAuth } from "@/lib/auth-context";
 import { X, Save, User, Phone, MapPin, Briefcase, Shield, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import confetti from "canvas-confetti";
+import { AvatarBadge } from "@/components/shared/AvatarBadge";
 
 interface EmployeeEditDrawerProps {
   employee: Employee | null;
@@ -79,14 +80,13 @@ export function EmployeeEditDrawer({ employee, isOpen, onClose, onSaved }: Emplo
         </button>
 
         <div className="flex items-center gap-3 mb-4 pb-3 border-b border-[var(--border)]">
-          <div className="w-10 h-10 rounded-full overflow-hidden border border-cyan-500/40 bg-slate-800 flex items-center justify-center font-bold text-cyan-300">
-            {employee.avatarUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={employee.avatarUrl} alt={employee.firstName} className="w-full h-full object-cover" />
-            ) : (
-              <span>{employee.firstName[0]}</span>
-            )}
-          </div>
+          <AvatarBadge
+            name={`${employee.firstName} ${employee.lastName}`}
+            department={employee.department}
+            size="md"
+            status={employee.status}
+            showStatus
+          />
           <div>
             <h3 className="text-base font-bold text-[var(--foreground)]">Edit Employee Profile</h3>
             <p className="text-xs text-slate-400">

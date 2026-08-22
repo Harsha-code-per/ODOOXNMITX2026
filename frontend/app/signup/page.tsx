@@ -41,8 +41,8 @@ export default function SignupPage() {
       <main className="flex-1 flex items-center justify-center p-4 z-10 my-6">
         <div className="w-full max-w-lg glass-panel rounded-3xl border border-cyan-500/30 shadow-2xl p-6 sm:p-8 relative">
           <div className="flex flex-col items-center text-center mb-6">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-cyan-600 to-blue-600 flex items-center justify-center text-white font-extrabold text-xl shadow-lg shadow-cyan-500/30 mb-2">
-              D
+            <div className="w-14 h-14 rounded-2xl p-1.5 bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center shadow-xl shadow-cyan-500/25 mb-2 overflow-hidden">
+              <img src="/logo.png" alt="Dayflow Logo" className="w-full h-full object-contain" />
             </div>
             <h1 className="text-2xl font-bold font-heading">Register New Employee</h1>
             <p className="text-xs text-slate-400">Join your team on Dayflow HRMS</p>

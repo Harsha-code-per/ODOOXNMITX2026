@@ -20,6 +20,7 @@ import {
   Sparkles,
   BarChart3,
 } from "lucide-react";
+import { AvatarBadge } from "@/components/shared/AvatarBadge";
 import Link from "next/link";
 
 export default function AdminDashboardPage() {
@@ -168,14 +169,11 @@ export default function AdminDashboardPage() {
                 className="p-4 rounded-2xl bg-slate-900/80 border border-cyan-500/30 flex flex-col justify-between text-xs"
               >
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-full overflow-hidden border border-cyan-500/40 bg-slate-800 flex items-center justify-center font-bold text-cyan-300">
-                    {req.avatarUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={req.avatarUrl} alt={req.employeeName} className="w-full h-full object-cover" />
-                    ) : (
-                      <span>{req.employeeName[0]}</span>
-                    )}
-                  </div>
+                  <AvatarBadge
+                    name={req.employeeName}
+                    department={req.department}
+                    size="md"
+                  />
                   <div>
                     <h4 className="font-bold text-slate-100">{req.employeeName}</h4>
                     <span className="text-[11px] text-cyan-400">
@@ -226,14 +224,13 @@ export default function AdminDashboardPage() {
               className="p-3.5 rounded-xl bg-slate-900/60 border border-[var(--border)] flex items-center justify-between hover:border-cyan-500/40 transition-colors"
             >
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-full overflow-hidden border border-slate-700 bg-slate-800 flex items-center justify-center font-bold text-cyan-300">
-                  {emp.avatarUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={emp.avatarUrl} alt={emp.firstName} className="w-full h-full object-cover" />
-                  ) : (
-                    <span>{emp.firstName[0]}</span>
-                  )}
-                </div>
+                <AvatarBadge
+                  name={`${emp.firstName} ${emp.lastName}`}
+                  department={emp.department}
+                  size="sm"
+                  status={emp.status}
+                  showStatus
+                />
                 <div>
                   <h4 className="font-bold text-slate-200">
                     {emp.firstName} {emp.lastName}

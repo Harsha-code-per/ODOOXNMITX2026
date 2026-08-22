@@ -52,8 +52,8 @@ export default function LoginPage() {
         <div className="w-full max-w-md glass-panel rounded-3xl border border-cyan-500/30 shadow-2xl p-6 sm:p-8 relative">
           {/* Logo & Header */}
           <div className="flex flex-col items-center text-center mb-6">
-            <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-cyan-600 to-blue-600 flex items-center justify-center text-white font-extrabold text-xl shadow-lg shadow-cyan-500/30 mb-3">
-              D
+            <div className="w-16 h-16 rounded-2xl p-1.5 bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center shadow-xl shadow-cyan-500/25 mb-3 overflow-hidden">
+              <img src="/logo.png" alt="Dayflow Logo" className="w-full h-full object-contain" />
             </div>
             <h1 className="text-2xl font-bold font-heading">Welcome to Dayflow</h1>
             <p className="text-xs text-slate-400 mt-1">Sign in to your Enterprise HRMS Workspace</p>

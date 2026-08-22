@@ -15,6 +15,7 @@ import {
   Sparkles,
   Users,
 } from "lucide-react";
+import { AvatarBadge } from "@/components/shared/AvatarBadge";
 
 export default function AdminLeavesPage() {
   const [requests, setRequests] = useState<LeaveRequest[]>([]);
@@ -98,14 +99,11 @@ export default function AdminLeavesPage() {
                   {/* Top Applicant row */}
                   <div className="flex items-start justify-between gap-3 mb-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-11 h-11 rounded-2xl overflow-hidden border border-cyan-500/40 bg-slate-800 flex items-center justify-center font-bold text-cyan-300 shadow-md">
-                        {req.avatarUrl ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={req.avatarUrl} alt={req.employeeName} className="w-full h-full object-cover" />
-                        ) : (
-                          <span>{req.employeeName[0]}</span>
-                        )}
-                      </div>
+                      <AvatarBadge
+                        name={req.employeeName}
+                        department={req.department}
+                        size="md"
+                      />
                       <div>
                         <h4 className="font-bold text-slate-100 text-sm">{req.employeeName}</h4>
                         <span className="text-xs text-cyan-400 font-medium">{req.department}</span>

@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { DayflowApiClient } from "@/lib/api";
 import { NotificationItem } from "@/lib/mock-data";
+import { AvatarBadge } from "./AvatarBadge";
 
 interface NavbarProps {
   onToggleSidebar?: () => void;
@@ -80,9 +81,9 @@ export function Navbar({ onToggleSidebar, onOpenFlowAI }: NavbarProps) {
           )}
 
           <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="relative flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-600 via-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/25 group-hover:scale-105 transition-transform">
-              <span className="font-heading font-extrabold text-lg tracking-wider">D</span>
-              <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-slate-950" />
+            <div className="relative flex items-center justify-center w-9 h-9 rounded-xl p-1 bg-cyan-500/10 border border-cyan-500/30 shadow-lg shadow-cyan-500/20 group-hover:scale-105 transition-transform overflow-hidden">
+              <img src="/logo.png" alt="Dayflow Logo" className="w-full h-full object-contain" />
+              <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-400 border border-slate-950" />
             </div>
             <div className="flex flex-col">
               <span className="font-heading font-bold text-base sm:text-lg tracking-tight flex items-center gap-1.5">
@@ -201,18 +202,13 @@ export function Navbar({ onToggleSidebar, onOpenFlowAI }: NavbarProps) {
                 onClick={() => setShowUserDropdown(!showUserDropdown)}
                 className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-slate-800/40 transition-colors group"
               >
-                <div className="w-7 h-7 rounded-full overflow-hidden border border-cyan-500/40 bg-slate-800 flex items-center justify-center text-xs font-bold text-cyan-300">
-                  {user.employee.avatarUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={user.employee.avatarUrl}
-                      alt={user.employee.firstName}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <span>{user.employee.firstName[0]}</span>
-                  )}
-                </div>
+                <AvatarBadge
+                  name={`${user.employee.firstName} ${user.employee.lastName}`}
+                  department={user.employee.department}
+                  size="sm"
+                  status={user.employee.status}
+                  showStatus
+                />
                 <div className="hidden lg:flex flex-col text-left">
                   <span className="text-xs font-semibold text-[var(--foreground)] leading-none flex items-center gap-1">
                     {user.employee.firstName} {user.employee.lastName}

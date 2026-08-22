@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import confetti from "canvas-confetti";
+import { AvatarBadge } from "@/components/shared/AvatarBadge";
 
 export default function AdminPayrollPage() {
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -137,14 +138,11 @@ export default function AdminPayrollPage() {
               return (
                 <tr key={emp.id} className="hover:bg-slate-800/20 transition-colors">
                   <td className="py-3 flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-full overflow-hidden border border-slate-700 bg-slate-800 flex items-center justify-center font-bold text-cyan-300">
-                      {emp.avatarUrl ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={emp.avatarUrl} alt={emp.firstName} className="w-full h-full object-cover" />
-                      ) : (
-                        <span>{emp.firstName[0]}</span>
-                      )}
-                    </div>
+                    <AvatarBadge
+                      name={`${emp.firstName} ${emp.lastName}`}
+                      department={emp.department}
+                      size="sm"
+                    />
                     <div>
                       <span className="font-bold text-slate-200 block">
                         {emp.firstName} {emp.lastName}

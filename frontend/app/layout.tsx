@@ -19,7 +19,11 @@ export const metadata: Metadata = {
   title: "Dayflow HRMS — Next-Gen Human Resource Management",
   description: "Every workday, perfectly aligned. Enterprise attendance pulse, dynamic salary engine, and leave management.",
   icons: {
-    icon: "/favicon.ico",
+    icon: [
+      { url: "/favicon.png", type: "image/png" },
+      { url: "/favicon.ico" },
+    ],
+    apple: "/logo.png",
   },
 };
 

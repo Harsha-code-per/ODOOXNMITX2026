@@ -8,6 +8,7 @@ import { X, CheckCircle2, XCircle, Calendar, User, MessageSquare } from "lucide-
 import { toast } from "sonner";
 import { formatDate } from "@/lib/utils";
 import confetti from "canvas-confetti";
+import { AvatarBadge } from "@/components/shared/AvatarBadge";
 
 interface LeaveApprovalDrawerProps {
   request: LeaveRequest | null;
@@ -63,14 +64,11 @@ export function LeaveApprovalDrawer({ request, onClose, onReviewed }: LeaveAppro
 
         {/* Header */}
         <div className="flex items-center gap-3 mb-4 pb-3 border-b border-[var(--border)]">
-          <div className="w-10 h-10 rounded-full overflow-hidden border border-cyan-500/40 bg-slate-800 flex items-center justify-center text-sm font-bold text-cyan-300">
-            {request.avatarUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={request.avatarUrl} alt={request.employeeName} className="w-full h-full object-cover" />
-            ) : (
-              <span>{request.employeeName[0]}</span>
-            )}
-          </div>
+          <AvatarBadge
+            name={request.employeeName}
+            department={request.department}
+            size="md"
+          />
           <div>
             <h3 className="text-base font-bold text-[var(--foreground)]">{request.employeeName}</h3>
             <p className="text-xs text-cyan-400">{request.department} · {request.totalDays} Day(s) {request.leaveType} Leave</p>

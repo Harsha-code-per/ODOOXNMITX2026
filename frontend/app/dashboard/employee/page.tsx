@@ -22,6 +22,7 @@ import {
   AlertCircle,
   Briefcase,
 } from "lucide-react";
+import { AvatarBadge } from "@/components/shared/AvatarBadge";
 import Link from "next/link";
 
 export default function EmployeeDashboardPage() {
@@ -56,14 +57,13 @@ export default function EmployeeDashboardPage() {
       {/* Welcome Header */}
       <div className="flex flex-wrap items-center justify-between gap-4 p-6 rounded-3xl glass-panel border border-[var(--border)] relative overflow-hidden">
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl overflow-hidden border-2 border-cyan-500/50 shadow-lg shadow-cyan-500/25 bg-slate-800 flex items-center justify-center text-lg font-bold text-cyan-300">
-            {user?.employee.avatarUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={user.employee.avatarUrl} alt={user.employee.firstName} className="w-full h-full object-cover" />
-            ) : (
-              <span>{user?.employee.firstName[0]}</span>
-            )}
-          </div>
+          <AvatarBadge
+            name={`${user?.employee.firstName || "Alex"} ${user?.employee.lastName || "Rivera"}`}
+            department={user?.employee.department}
+            size="xl"
+            status={user?.employee.status}
+            showStatus
+          />
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-xl sm:text-2xl font-bold font-heading">

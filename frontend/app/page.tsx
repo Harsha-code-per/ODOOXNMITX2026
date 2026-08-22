@@ -50,8 +50,8 @@ export default function LandingPage() {
       {/* Main Navbar */}
       <header className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between z-20">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-600 to-blue-600 flex items-center justify-center text-white font-extrabold shadow-lg shadow-cyan-500/30">
-            D
+          <div className="w-10 h-10 rounded-xl p-1 bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center shadow-lg shadow-cyan-500/20 overflow-hidden">
+            <img src="/logo.png" alt="Dayflow Logo" className="w-full h-full object-contain" />
           </div>
           <span className="font-heading font-extrabold text-xl tracking-tight">
             Dayflow <span className="text-cyan-400 font-semibold text-sm">HRMS</span>
