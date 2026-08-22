@@ -170,7 +170,7 @@ export default function LoginPage() {
             <Link href="/contact" className="text-cyan-700 hover:underline font-bold">
               Need a Workspace? Contact Sales
             </Link>
-            <Link href="/platform-admin" className="text-slate-400 hover:text-slate-700">
+            <Link href="/platform-admin/login" className="text-slate-400 hover:text-slate-700">
               Platform Admin
             </Link>
           </div>

@@ -22,12 +22,14 @@ import {
   Search,
   KeyRound,
   FileCheck2,
+  Lock,
+  LogOut,
 } from "lucide-react";
 import { toast } from "sonner";
 
 export default function PlatformAdminPage() {
   const router = useRouter();
-  const { user, switchPersona } = useAuth();
+  const { user, isLoading, logout, switchPersona } = useAuth();
   const [companies, setCompanies] = useState<CompanyTenant[]>([]);
   const [inquiries, setInquiries] = useState<CompanyInquiry[]>([]);
   const [activeTab, setActiveTab] = useState<"companies" | "inquiries">("companies");
@@ -47,6 +49,14 @@ export default function PlatformAdminPage() {
     company: CompanyTenant;
     tempPass: string;
   } | null>(null);
+
+  // Auth Guard: Enforce SUPER_ADMIN role
+  useEffect(() => {
+    if (!isLoading && user?.role !== "SUPER_ADMIN") {
+      toast.error("Restricted Access: Super Admin session required.");
+      router.push("/platform-admin/login");
+    }
+  }, [user, isLoading, router]);
 
   useEffect(() => {
     loadData();
@@ -110,6 +120,12 @@ export default function PlatformAdminPage() {
     toast.success("Copied credentials to clipboard!");
   };
 
+  const handleLockConsole = () => {
+    logout();
+    toast.info("Super Admin session locked.");
+    router.push("/platform-admin/login");
+  };
+
   const filteredCompanies = companies.filter(
     (c) =>
       c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -123,6 +139,17 @@ export default function PlatformAdminPage() {
     if (c.plan === "Growth") return s + 149;
     return s + 499;
   }, 0);
+
+  if (isLoading || user?.role !== "SUPER_ADMIN") {
+    return (
+      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-white p-4">
+        <div className="w-10 h-10 rounded-2xl bg-cyan-950 border border-cyan-500/40 text-cyan-400 flex items-center justify-center mb-3 animate-pulse">
+          <Lock className="w-5 h-5" />
+        </div>
+        <p className="text-sm font-semibold text-slate-300">Verifying Super Admin Authorization...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#fafafc] text-slate-900 flex flex-col font-sans">
@@ -143,21 +170,18 @@ export default function PlatformAdminPage() {
           </div>
 
           <div className="flex items-center gap-3">
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200 text-xs text-slate-600">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="font-mono text-[11px] font-bold text-slate-900">{user?.email}</span>
+            </div>
+
             <button
-              onClick={() => {
-                switchPersona("superadmin");
-                toast.success("Switched to Dayflow Platform Staff persona");
-              }}
-              className="px-3 py-1.5 rounded-xl bg-cyan-50 hover:bg-cyan-100 text-cyan-900 border border-cyan-200 text-xs font-semibold transition-colors"
+              onClick={handleLockConsole}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-semibold transition-colors"
             >
-              Staff Persona
+              <LogOut className="w-3.5 h-3.5" />
+              <span>Lock Console</span>
             </button>
-            <Link
-              href="/dashboard/admin"
-              className="px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors"
-            >
-              Client Admin View
-            </Link>
           </div>
         </div>
       </header>
