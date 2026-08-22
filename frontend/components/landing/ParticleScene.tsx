@@ -23,8 +23,8 @@ export function ParticleScene({ scrollProgress = 0 }: ParticleSceneProps) {
     y: 0,
     targetX: 0,
     targetY: 0,
-    worldPoint: new THREE.Vector3(0, -9, 0),
-    targetWorldPoint: new THREE.Vector3(0, -9, 0),
+    worldPoint: new THREE.Vector3(0, -8, 0),
+    targetWorldPoint: new THREE.Vector3(0, -8, 0),
     isHovering: false,
   });
 
@@ -39,12 +39,12 @@ export function ParticleScene({ scrollProgress = 0 }: ParticleSceneProps) {
     // 1. Scene, Camera & Renderer
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(
-      50,
+      52,
       window.innerWidth / window.innerHeight,
       0.1,
       1000
     );
-    camera.position.set(0, 11, 40);
+    camera.position.set(0, 13, 40);
 
     const renderer = new THREE.WebGLRenderer({
       antialias: true,
@@ -56,9 +56,9 @@ export function ParticleScene({ scrollProgress = 0 }: ParticleSceneProps) {
     renderer.setClearColor(0x000000, 0); // Pure transparent for studio light canvas
     container.appendChild(renderer.domElement);
 
-    // 2. High-Density Subtle 3D Wave Mesh
-    const gridCols = 86;
-    const gridRows = 64;
+    // 2. High-Density 3D Geometric Wave Grid
+    const gridCols = 88;
+    const gridRows = 66;
     const gridSpacingX = 1.45;
     const gridSpacingZ = 1.45;
     const totalPoints = gridCols * gridRows;
@@ -70,6 +70,7 @@ export function ParticleScene({ scrollProgress = 0 }: ParticleSceneProps) {
 
     const cyanColor = new THREE.Color("#0891B2");
     const oceanColor = new THREE.Color("#0284C7");
+    const tealColor = new THREE.Color("#0D9488");
     const slateColor = new THREE.Color("#64748B");
 
     let idx = 0;
@@ -87,13 +88,14 @@ export function ParticleScene({ scrollProgress = 0 }: ParticleSceneProps) {
         origPositions[idx * 3 + 1] = y;
         origPositions[idx * 3 + 2] = z;
 
-        // Subtle gradient transition
+        // Dynamic depth & radial color palette
         const normR = r / gridRows;
         const normC = c / gridCols;
         const mixedColor = cyanColor
           .clone()
-          .lerp(oceanColor, normR * 0.6)
-          .lerp(slateColor, Math.abs(normC - 0.5) * 0.3);
+          .lerp(oceanColor, normR * 0.7)
+          .lerp(tealColor, normC * 0.35)
+          .lerp(slateColor, Math.abs(normC - 0.5) * 0.2);
 
         colors[idx * 3] = mixedColor.r;
         colors[idx * 3 + 1] = mixedColor.g;
@@ -106,7 +108,7 @@ export function ParticleScene({ scrollProgress = 0 }: ParticleSceneProps) {
     planeGeo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
     planeGeo.setAttribute("color", new THREE.BufferAttribute(colors, 3));
 
-    // Custom Shader for Minimal, Refined Point Nodes
+    // Custom Shader for Responsive Point Nodes
     const pointMaterial = new THREE.ShaderMaterial({
       vertexShader: `
         attribute vec3 color;
@@ -120,14 +122,14 @@ export function ParticleScene({ scrollProgress = 0 }: ParticleSceneProps) {
           vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
           
           float depth = -mvPosition.z;
-          vAlpha = smoothstep(95.0, 18.0, depth) * 0.65;
+          vAlpha = smoothstep(95.0, 16.0, depth) * 0.8;
 
-          // Gentle mouse proximity highlight
+          // Proximity to mouse world point illuminates vertices
           float distToMouse = length(position.xz - uMouseWorld.xz);
-          float mouseGlow = smoothstep(14.0, 0.0, distToMouse);
-          vAlpha += mouseGlow * 0.25;
+          float mouseGlow = smoothstep(18.0, 0.0, distToMouse);
+          vAlpha += mouseGlow * 0.3;
 
-          gl_PointSize = clamp(170.0 / depth, 2.5, 6.0) * (1.0 + mouseGlow * 0.35);
+          gl_PointSize = clamp(220.0 / depth, 3.0, 8.5) * (1.0 + mouseGlow * 0.45);
           gl_Position = projectionMatrix * mvPosition;
         }
       `,
@@ -138,7 +140,7 @@ export function ParticleScene({ scrollProgress = 0 }: ParticleSceneProps) {
         void main() {
           float dist = length(gl_PointCoord - vec2(0.5));
           if (dist > 0.5) discard;
-          float circleAlpha = smoothstep(0.5, 0.15, dist) * vAlpha;
+          float circleAlpha = smoothstep(0.5, 0.12, dist) * vAlpha;
           gl_FragColor = vec4(vColor, circleAlpha);
         }
       `,
@@ -153,7 +155,7 @@ export function ParticleScene({ scrollProgress = 0 }: ParticleSceneProps) {
     const pointMesh = new THREE.Points(planeGeo, pointMaterial);
     scene.add(pointMesh);
 
-    // Connected Lattice Lines (Subtle & Clean)
+    // Connected Lattice Lines (Clean, Crisp & Visible)
     const lineIndices: number[] = [];
     for (let r = 0; r < gridRows; r++) {
       for (let c = 0; c < gridCols; c++) {
@@ -174,17 +176,17 @@ export function ParticleScene({ scrollProgress = 0 }: ParticleSceneProps) {
     const lineMat = new THREE.LineBasicMaterial({
       color: 0x0891b2,
       transparent: true,
-      opacity: 0.11,
+      opacity: 0.16,
       blending: THREE.NormalBlending,
     });
 
     const gridLines = new THREE.LineSegments(lineGeo, lineMat);
     scene.add(gridLines);
 
-    // 3. Mouse 3D Raycasting & Subtle Tracking
+    // 3. Mouse 3D Raycasting & Tracking
     const raycaster = new THREE.Raycaster();
     const ndcMouse = new THREE.Vector2(-999, -999);
-    const groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 9);
+    const groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 8);
     const intersectPoint = new THREE.Vector3();
 
     const handleMouseMove = (e: MouseEvent) => {
@@ -218,7 +220,7 @@ export function ParticleScene({ scrollProgress = 0 }: ParticleSceneProps) {
     };
     window.addEventListener("resize", handleResize);
 
-    // 4. Subtle, Smooth Animation Loop (60FPS)
+    // 4. 60FPS Kinetic Animation Loop
     let animId: number;
     const clock = new THREE.Clock();
 
@@ -226,17 +228,17 @@ export function ParticleScene({ scrollProgress = 0 }: ParticleSceneProps) {
       animId = requestAnimationFrame(animate);
       const elapsedTime = clock.getElapsedTime();
 
-      // Soft damping for mouse physics
-      mouseRef.current.x += (mouseRef.current.targetX - mouseRef.current.x) * 0.03;
-      mouseRef.current.y += (mouseRef.current.targetY - mouseRef.current.y) * 0.03;
-      mouseRef.current.worldPoint.lerp(mouseRef.current.targetWorldPoint, 0.08);
+      // Smooth mouse spring physics
+      mouseRef.current.x += (mouseRef.current.targetX - mouseRef.current.x) * 0.04;
+      mouseRef.current.y += (mouseRef.current.targetY - mouseRef.current.y) * 0.04;
+      mouseRef.current.worldPoint.lerp(mouseRef.current.targetWorldPoint, 0.09);
 
       const mouseX = mouseRef.current.x;
       const mouseY = mouseRef.current.y;
       const mouseW = mouseRef.current.worldPoint;
       const scroll = scrollRef.current;
 
-      // Subtle, gentle harmonic waves
+      // Perfectly Calibrated Wave Equations: Lively, interactive, and elegant
       const posArray = planeGeo.attributes.position.array as Float32Array;
       let pIdx = 0;
 
@@ -245,24 +247,24 @@ export function ParticleScene({ scrollProgress = 0 }: ParticleSceneProps) {
           const ox = origPositions[pIdx * 3];
           const oz = origPositions[pIdx * 3 + 2];
 
-          // Gentle, calm harmonic elevation
-          const harmonic1 = Math.sin(ox * 0.05 + elapsedTime * 0.55) * Math.cos(oz * 0.05 + elapsedTime * 0.45) * 1.3;
-          const harmonic2 = Math.sin(ox * 0.09 - oz * 0.06 + elapsedTime * 0.35) * 0.55;
+          // Harmonic Wave Equation (Balanced 2.2 amplitude)
+          const harmonic1 = Math.sin(ox * 0.065 + elapsedTime * 0.85) * Math.cos(oz * 0.065 + elapsedTime * 0.7) * 2.2;
+          const harmonic2 = Math.sin(ox * 0.12 - oz * 0.08 + elapsedTime * 0.5) * 0.9;
 
-          // Subtle, smooth mouse elevation ripple
+          // Interactive Mouse Liquid Ripple (Smooth 1.8 amplitude)
           let mouseRipple = 0;
           if (mouseRef.current.isHovering) {
             const dist = Math.hypot(ox - mouseW.x, oz - mouseW.z);
-            if (dist < 20.0) {
-              const damp = Math.exp(-dist * 0.12);
-              mouseRipple = Math.sin(dist * 0.35 - elapsedTime * 2.0) * damp * 0.85;
+            if (dist < 24.0) {
+              const damp = Math.exp(-dist * 0.1);
+              mouseRipple = Math.sin(dist * 0.45 - elapsedTime * 3.5) * damp * 1.8;
             }
           }
 
-          // Gentle scroll transformation
-          const scrollElevation = Math.sin(ox * 0.04 + scroll * Math.PI) * (scroll * 2.2);
+          // Dynamic Scroll Lift Transformation
+          const scrollElevation = Math.sin(ox * 0.05 + scroll * Math.PI * 1.5) * (scroll * 3.0);
 
-          posArray[pIdx * 3 + 1] = harmonic1 + harmonic2 + mouseRipple + scrollElevation - 9.0;
+          posArray[pIdx * 3 + 1] = harmonic1 + harmonic2 + mouseRipple + scrollElevation - 8.0;
           pIdx++;
         }
       }
@@ -270,15 +272,15 @@ export function ParticleScene({ scrollProgress = 0 }: ParticleSceneProps) {
       planeGeo.attributes.position.needsUpdate = true;
       lineGeo.attributes.position.needsUpdate = true;
 
-      // Gentle, subtle camera motion
-      const targetCamX = mouseX * 2.5 - scroll * 4;
-      const targetCamY = 11 - scroll * 6 + mouseY * 1.5;
-      const targetCamZ = 40 - scroll * 10;
+      // Camera Motion & Scrollytelling Choreography
+      const targetCamX = mouseX * 4 - scroll * 6;
+      const targetCamY = 13 - scroll * 8 + mouseY * 2.0;
+      const targetCamZ = 40 - scroll * 12;
 
-      camera.position.x += (targetCamX - camera.position.x) * 0.03;
-      camera.position.y += (targetCamY - camera.position.y) * 0.03;
-      camera.position.z += (targetCamZ - camera.position.z) * 0.03;
-      camera.lookAt(scroll * 4, -7, -10);
+      camera.position.x += (targetCamX - camera.position.x) * 0.04;
+      camera.position.y += (targetCamY - camera.position.y) * 0.04;
+      camera.position.z += (targetCamZ - camera.position.z) * 0.04;
+      camera.lookAt(scroll * 6, -5, -10);
 
       pointMaterial.uniforms.uTime.value = elapsedTime;
       pointMaterial.uniforms.uMouseWorld.value.copy(mouseW);
