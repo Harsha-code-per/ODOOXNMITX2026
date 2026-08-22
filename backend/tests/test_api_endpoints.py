@@ -144,3 +144,104 @@ async def test_executive_analytics_dashboard(client: AsyncClient):
     assert "department_distribution" in dash_data
     assert len(dash_data["department_distribution"]) > 0
     assert "attendance_trends" in dash_data
+
+
+@pytest.mark.asyncio
+async def test_registration_rbac_restrictions(client: AsyncClient):
+    new_user_payload = {
+        "employee_id": "EMP-999",
+        "email": "test.newbie@dayflow.io",
+        "password": "StrongPassword123!",
+        "first_name": "Test",
+        "last_name": "Newbie",
+        "role": "EMPLOYEE",
+        "department": "Engineering",
+        "designation": "Junior Developer",
+    }
+
+    # 1. Unauthenticated registration attempt -> 401
+    unauth_res = await client.post("/api/v1/auth/register", json=new_user_payload)
+    assert unauth_res.status_code == 401
+
+    # 2. EMPLOYEE trying to register a new user -> 403
+    alex_res = await client.post("/api/v1/auth/login", json={
+        "email": "alex.rivera@dayflow.io",
+        "password": "password123",
+    })
+    alex_token = alex_res.json()["access_token"]
+    alex_headers = {"Authorization": f"Bearer {alex_token}"}
+
+    emp_reg_res = await client.post("/api/v1/auth/register", json=new_user_payload, headers=alex_headers)
+    assert emp_reg_res.status_code == 403
+
+    # 3. HR registering a new user -> 201
+    hr_res = await client.post("/api/v1/auth/login", json={
+        "email": "sarah.hr@dayflow.io",
+        "password": "password123",
+    })
+    hr_token = hr_res.json()["access_token"]
+    hr_headers = {"Authorization": f"Bearer {hr_token}"}
+
+    hr_reg_res = await client.post("/api/v1/auth/register", json=new_user_payload, headers=hr_headers)
+    assert hr_reg_res.status_code == 201
+    assert hr_reg_res.json()["employee_id"] == "EMP-999"
+
+
+@pytest.mark.asyncio
+async def test_payroll_rbac_and_ownership(client: AsyncClient):
+    # Alex (Employee EMP-003)
+    alex_res = await client.post("/api/v1/auth/login", json={
+        "email": "alex.rivera@dayflow.io",
+        "password": "password123",
+    })
+    alex_token = alex_res.json()["access_token"]
+    alex_headers = {"Authorization": f"Bearer {alex_token}"}
+
+    # Sarah (HR EMP-002)
+    hr_res = await client.post("/api/v1/auth/login", json={
+        "email": "sarah.hr@dayflow.io",
+        "password": "password123",
+    })
+    hr_token = hr_res.json()["access_token"]
+    hr_headers = {"Authorization": f"Bearer {hr_token}"}
+
+    # 1. EMPLOYEE viewing own payroll (EMP-003) -> 200 OK
+    own_res = await client.get("/api/v1/admin/payroll/EMP-003", headers=alex_headers)
+    assert own_res.status_code == 200
+    assert own_res.json()["employee_id"] == "EMP-003"
+
+    # 2. EMPLOYEE trying to view Arthur's payroll (EMP-001) -> 403 Forbidden
+    other_res = await client.get("/api/v1/admin/payroll/EMP-001", headers=alex_headers)
+    assert other_res.status_code == 403
+
+    # 3. EMPLOYEE trying to edit wage -> 403 Forbidden
+    emp_update_res = await client.put(
+        "/api/v1/admin/payroll/EMP-003/salary",
+        json={"wage": 100000.0},
+        headers=alex_headers,
+    )
+    assert emp_update_res.status_code == 403
+
+    # 4. HR viewing Alex's payroll (EMP-003) -> 200 OK
+    hr_view_res = await client.get("/api/v1/admin/payroll/EMP-003", headers=hr_headers)
+    assert hr_view_res.status_code == 200
+    assert hr_view_res.json()["employee_id"] == "EMP-003"
+
+
+@pytest.mark.asyncio
+async def test_leave_approval_rbac_restriction(client: AsyncClient):
+    # Alex (Employee)
+    alex_res = await client.post("/api/v1/auth/login", json={
+        "email": "alex.rivera@dayflow.io",
+        "password": "password123",
+    })
+    alex_token = alex_res.json()["access_token"]
+    alex_headers = {"Authorization": f"Bearer {alex_token}"}
+
+    # Employee trying to approve leave -> 403 Forbidden
+    appr_res = await client.patch(
+        "/api/v1/leaves/some-leave-id/approve",
+        json={"hr_comments": "Approved"},
+        headers=alex_headers,
+    )
+    assert appr_res.status_code == 403

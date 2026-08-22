@@ -59,6 +59,18 @@ async def get_employee_payroll(
             detail=f"Employee {id_or_emp_id} not found",
         )
 
+    user_role = str(current_user.role.value if hasattr(current_user.role, "value") else current_user.role)
+    is_admin_or_hr = user_role in ["ADMIN", "HR"]
+    is_own_payroll = current_user.employee and (
+        current_user.employee.id == emp.id or current_user.employee.employee_id == emp.employee_id
+    )
+
+    if not is_admin_or_hr and not is_own_payroll:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied: You do not have permission to view this employee's payroll details",
+        )
+
     return await get_employee_payroll_summary(db, emp)
 
 
@@ -106,7 +118,7 @@ async def update_wage_and_recalculate(
 async def preview_salary_calculation(
     id_or_emp_id: str,
     req: WageUpdateRequest,
-    current_user: Profile = Depends(get_current_user),
+    current_user: Profile = Depends(require_roles(["ADMIN", "HR"])),
 ):
     calc = calculate_salary_structure(req.wage)
     return SalaryComponents(**calc)

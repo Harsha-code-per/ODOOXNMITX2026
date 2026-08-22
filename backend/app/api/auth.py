@@ -5,7 +5,7 @@ from sqlalchemy.orm import selectinload
 
 from app.database import get_db
 from app.core.security import verify_password, get_password_hash, create_access_token
-from app.core.permissions import get_current_user
+from app.core.permissions import get_current_user, require_roles
 from app.models.profile import Profile, UserRole
 from app.models.employee import Employee
 from app.models.payroll import SalaryStructure
@@ -71,7 +71,11 @@ async def login(req: LoginRequest, db: AsyncSession = Depends(get_db)):
 
 
 @router.post("/register", response_model=RegisterResponse, status_code=status.HTTP_201_CREATED)
-async def register(req: RegisterRequest, db: AsyncSession = Depends(get_db)):
+async def register(
+    req: RegisterRequest,
+    current_user: Profile = Depends(require_roles(["ADMIN", "HR"])),
+    db: AsyncSession = Depends(get_db),
+):
     # Check if email or employee_id exists
     stmt = select(Profile).where(Profile.email == req.email.lower())
     res = await db.execute(stmt)
