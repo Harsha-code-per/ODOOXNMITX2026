@@ -34,7 +34,7 @@ async def get_my_payroll(
             detail="Employee profile not found",
         )
 
-    summary = await get_employee_payroll_summary(db, current_user.employee)
+    summary = await get_employee_payroll_summary(db, current_user.employee, current_user.company_id)
     return summary
 
 
@@ -47,7 +47,10 @@ async def get_employee_payroll(
 ):
     stmt = (
         select(Employee)
-        .where(or_(Employee.id == id_or_emp_id, Employee.employee_id == id_or_emp_id))
+        .where(
+            Employee.company_id == current_user.company_id,
+            or_(Employee.id == id_or_emp_id, Employee.employee_id == id_or_emp_id),
+        )
         .options(selectinload(Employee.salary_structure))
     )
     res = await db.execute(stmt)
@@ -56,7 +59,7 @@ async def get_employee_payroll(
     if not emp:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Employee {id_or_emp_id} not found",
+            detail=f"Employee {id_or_emp_id} not found in this company",
         )
 
     user_role = str(current_user.role.value if hasattr(current_user.role, "value") else current_user.role)
@@ -71,7 +74,7 @@ async def get_employee_payroll(
             detail="Access denied: You do not have permission to view this employee's payroll details",
         )
 
-    return await get_employee_payroll_summary(db, emp)
+    return await get_employee_payroll_summary(db, emp, current_user.company_id)
 
 
 @router.put("/admin/payroll/{id_or_emp_id}/salary", response_model=SalaryRecalculationResponse)
@@ -83,7 +86,8 @@ async def update_wage_and_recalculate(
     db: AsyncSession = Depends(get_db),
 ):
     stmt = select(Employee).where(
-        or_(Employee.id == id_or_emp_id, Employee.employee_id == id_or_emp_id)
+        Employee.company_id == current_user.company_id,
+        or_(Employee.id == id_or_emp_id, Employee.employee_id == id_or_emp_id),
     )
     res = await db.execute(stmt)
     emp = res.scalar_one_or_none()
@@ -91,10 +95,10 @@ async def update_wage_and_recalculate(
     if not emp:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Employee {id_or_emp_id} not found",
+            detail=f"Employee {id_or_emp_id} not found in this company",
         )
 
-    updated_structure = await update_employee_salary(db, emp.id, req.wage)
+    updated_structure = await update_employee_salary(db, emp.id, current_user.company_id, req.wage)
 
     return SalaryRecalculationResponse(
         message="Salary structure successfully recalculated and saved",
@@ -122,3 +126,4 @@ async def preview_salary_calculation(
 ):
     calc = calculate_salary_structure(req.wage)
     return SalaryComponents(**calc)
+

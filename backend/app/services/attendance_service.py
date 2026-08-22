@@ -10,10 +10,11 @@ from app.models.employee import Employee
 
 
 async def process_check_in(
-    db: AsyncSession, employee_id: str, notes: Optional[str] = None
+    db: AsyncSession, employee_id: str, company_id: str, notes: Optional[str] = None
 ) -> Attendance:
     today = date.today()
     stmt = select(Attendance).where(
+        Attendance.company_id == company_id,
         Attendance.employee_id == employee_id,
         Attendance.work_date == today,
     )
@@ -35,6 +36,7 @@ async def process_check_in(
             record.notes = notes
     else:
         record = Attendance(
+            company_id=company_id,
             employee_id=employee_id,
             work_date=today,
             check_in=now_utc,
@@ -51,10 +53,11 @@ async def process_check_in(
 
 
 async def process_check_out(
-    db: AsyncSession, employee_id: str, notes: Optional[str] = None
+    db: AsyncSession, employee_id: str, company_id: str, notes: Optional[str] = None
 ) -> Attendance:
     today = date.today()
     stmt = select(Attendance).where(
+        Attendance.company_id == company_id,
         Attendance.employee_id == employee_id,
         Attendance.work_date == today,
     )
@@ -99,6 +102,7 @@ async def process_check_out(
 async def get_employee_attendance_history(
     db: AsyncSession,
     employee_id: str,
+    company_id: str,
     start_date: Optional[date] = None,
     end_date: Optional[date] = None,
 ) -> Dict[str, Any]:
@@ -111,6 +115,7 @@ async def get_employee_attendance_history(
     stmt = (
         select(Attendance)
         .where(
+            Attendance.company_id == company_id,
             Attendance.employee_id == employee_id,
             Attendance.work_date >= start_date,
             Attendance.work_date <= end_date,
@@ -152,20 +157,28 @@ async def get_employee_attendance_history(
 
 async def get_company_attendance(
     db: AsyncSession,
+    company_id: str,
     work_date: Optional[date] = None,
     department: Optional[str] = None,
 ) -> List[Dict[str, Any]]:
     target_date = work_date or date.today()
 
-    emp_stmt = select(Employee).options(selectinload(Employee.attendance_records))
+    emp_stmt = (
+        select(Employee)
+        .where(Employee.company_id == company_id)
+        .options(selectinload(Employee.attendance_records))
+    )
     if department and department.lower() != "all":
         emp_stmt = emp_stmt.where(Employee.department == department)
 
     emp_result = await db.execute(emp_stmt)
     employees = emp_result.scalars().all()
 
-    # Fetch attendance records for all employees on target_date
-    att_stmt = select(Attendance).where(Attendance.work_date == target_date)
+    # Fetch attendance records for all employees in this company on target_date
+    att_stmt = select(Attendance).where(
+        Attendance.company_id == company_id,
+        Attendance.work_date == target_date,
+    )
     att_result = await db.execute(att_stmt)
     att_map = {a.employee_id: a for a in att_result.scalars().all()}
 
@@ -187,3 +200,4 @@ async def get_company_attendance(
         })
 
     return grid
+

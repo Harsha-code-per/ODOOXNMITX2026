@@ -20,12 +20,16 @@ DEFAULT_QUOTAS = {
 }
 
 
-async def get_or_create_leave_type(db: AsyncSession, type_enum: LeaveTypeEnum) -> LeaveType:
-    stmt = select(LeaveType).where(LeaveType.name == type_enum)
+async def get_or_create_leave_type(db: AsyncSession, company_id: str, type_enum: LeaveTypeEnum) -> LeaveType:
+    stmt = select(LeaveType).where(
+        LeaveType.company_id == company_id,
+        LeaveType.name == type_enum,
+    )
     result = await db.execute(stmt)
     lt = result.scalar_one_or_none()
     if not lt:
         lt = LeaveType(
+            company_id=company_id,
             name=type_enum,
             is_paid=(type_enum != LeaveTypeEnum.UNPAID),
             default_allocation=DEFAULT_QUOTAS.get(type_enum.value, 10),
@@ -40,6 +44,7 @@ async def get_or_create_leave_type(db: AsyncSession, type_enum: LeaveTypeEnum) -
 async def apply_for_leave(
     db: AsyncSession,
     employee: Employee,
+    company_id: str,
     leave_type_enum: LeaveTypeEnum,
     start_date: date,
     end_date: date,
@@ -60,9 +65,10 @@ async def apply_for_leave(
             detail="Leave duration must be at least 1 day",
         )
 
-    leave_type = await get_or_create_leave_type(db, leave_type_enum)
+    leave_type = await get_or_create_leave_type(db, company_id, leave_type_enum)
 
     leave_req = LeaveRequest(
+        company_id=company_id,
         employee_id=employee.id,
         leave_type_id=leave_type.id,
         start_date=start_date,
@@ -74,13 +80,17 @@ async def apply_for_leave(
     )
     db.add(leave_req)
 
-    # Dispatch notification to HR users
-    hr_stmt = select(Profile).where(Profile.role.in_([UserRole.HR, UserRole.ADMIN]))
+    # Dispatch notification to HR users in this company
+    hr_stmt = select(Profile).where(
+        Profile.company_id == company_id,
+        Profile.role.in_([UserRole.HR, UserRole.ADMIN]),
+    )
     hr_result = await db.execute(hr_stmt)
     hr_users = hr_result.scalars().all()
 
     for hr_user in hr_users:
         notif = Notification(
+            company_id=company_id,
             user_id=hr_user.id,
             type="LEAVE_SUBMITTED",
             title=f"New Leave Request from {employee.first_name} {employee.last_name}",
@@ -96,13 +106,17 @@ async def apply_for_leave(
 async def review_leave_request(
     db: AsyncSession,
     leave_id: str,
+    company_id: str,
     new_status: LeaveStatus,
     hr_comments: Optional[str],
     reviewer: Profile,
 ) -> LeaveRequest:
     stmt = (
         select(LeaveRequest)
-        .where(LeaveRequest.id == leave_id)
+        .where(
+            LeaveRequest.company_id == company_id,
+            LeaveRequest.id == leave_id,
+        )
         .options(
             selectinload(LeaveRequest.employee).selectinload(Employee.profile),
             selectinload(LeaveRequest.leave_type),
@@ -114,7 +128,7 @@ async def review_leave_request(
     if not req:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Leave request not found",
+            detail="Leave request not found in this company",
         )
 
     req.status = new_status
@@ -137,6 +151,7 @@ async def review_leave_request(
             # Skip weekends (Saturday=5, Sunday=6)
             if current.weekday() < 5:
                 att_stmt = select(Attendance).where(
+                    Attendance.company_id == company_id,
                     Attendance.employee_id == emp.id,
                     Attendance.work_date == current,
                 )
@@ -147,6 +162,7 @@ async def review_leave_request(
                     att.notes = f"Approved {req.leave_type.name.value} Leave"
                 else:
                     new_att = Attendance(
+                        company_id=company_id,
                         employee_id=emp.id,
                         work_date=current,
                         check_in=None,
@@ -161,6 +177,7 @@ async def review_leave_request(
     # Notify employee
     if req.employee and req.employee.profile:
         notif = Notification(
+            company_id=company_id,
             user_id=req.employee.profile.id,
             type=f"LEAVE_{new_status.value}",
             title=f"Leave Request {new_status.value.capitalize()}",
@@ -174,12 +191,13 @@ async def review_leave_request(
 
 
 async def get_leave_balances(
-    db: AsyncSession, employee_id: str
+    db: AsyncSession, employee_id: str, company_id: str
 ) -> Dict[str, Dict[str, int]]:
     stmt = (
         select(LeaveRequest)
         .join(LeaveType)
         .where(
+            LeaveRequest.company_id == company_id,
             LeaveRequest.employee_id == employee_id,
             LeaveRequest.status == LeaveStatus.APPROVED,
         )
@@ -209,11 +227,13 @@ async def get_leave_balances(
 
 async def list_leave_requests(
     db: AsyncSession,
+    company_id: str,
     employee_id: Optional[str] = None,
     status_filter: Optional[LeaveStatus] = None,
 ) -> List[Dict[str, Any]]:
     stmt = (
         select(LeaveRequest)
+        .where(LeaveRequest.company_id == company_id)
         .options(
             selectinload(LeaveRequest.employee),
             selectinload(LeaveRequest.leave_type),
@@ -254,3 +274,4 @@ async def list_leave_requests(
         })
 
     return items
+

@@ -9,6 +9,7 @@ class SalaryStructure(Base):
     __tablename__ = "salary_structures"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    company_id = Column(String(36), ForeignKey("companies.id", ondelete="CASCADE"), nullable=False, index=True)
     employee_id = Column(String(36), ForeignKey("employees.id", ondelete="CASCADE"), unique=True, nullable=False, index=True)
     effective_from = Column(Date, default=date.today, nullable=False)
     wage = Column(Float, nullable=False)  # Total monthly base / CTC (e.g. 60000.0)
@@ -28,3 +29,4 @@ class SalaryStructure(Base):
 
     # Relationships
     employee = relationship("Employee", back_populates="salary_structure")
+

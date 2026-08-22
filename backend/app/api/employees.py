@@ -15,8 +15,8 @@ from app.schemas.employee import EmployeeOut, EmployeeUpdate
 router = APIRouter(prefix="/employees", tags=["Employees"])
 
 
-def employee_to_out(emp: Employee) -> EmployeeOut:
-    wage_val = emp.salary_structure.wage if emp.salary_structure else 0.0
+def employee_to_out(emp: Employee, include_wage: bool = True) -> EmployeeOut:
+    wage_val = (emp.salary_structure.wage if emp.salary_structure else 0.0) if include_wage else 0.0
     return EmployeeOut(
         id=emp.id,
         user_id=emp.user_id,
@@ -52,12 +52,20 @@ async def get_my_employee_profile(
 
     stmt = (
         select(Employee)
-        .where(Employee.id == current_user.employee.id)
+        .where(
+            Employee.company_id == current_user.company_id,
+            Employee.id == current_user.employee.id,
+        )
         .options(selectinload(Employee.salary_structure))
     )
     res = await db.execute(stmt)
-    emp = res.scalar_one()
-    return employee_to_out(emp)
+    emp = res.scalar_one_or_none()
+    if not emp:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Employee profile not found in current company",
+        )
+    return employee_to_out(emp, include_wage=True)
 
 
 @router.get("", response_model=List[EmployeeOut])
@@ -68,7 +76,12 @@ async def list_employees(
     current_user: Profile = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    stmt = select(Employee).options(selectinload(Employee.salary_structure)).order_by(Employee.employee_id.asc())
+    stmt = (
+        select(Employee)
+        .where(Employee.company_id == current_user.company_id)
+        .options(selectinload(Employee.salary_structure))
+        .order_by(Employee.employee_id.asc())
+    )
 
     if department and department.lower() != "all":
         stmt = stmt.where(Employee.department == department)
@@ -89,7 +102,16 @@ async def list_employees(
 
     result = await db.execute(stmt)
     employees = result.scalars().all()
-    return [employee_to_out(e) for e in employees]
+    user_role = str(current_user.role.value if hasattr(current_user.role, "value") else current_user.role)
+    is_admin_or_hr = user_role in ["ADMIN", "HR"]
+
+    return [
+        employee_to_out(
+            e,
+            include_wage=(is_admin_or_hr or (current_user.employee and current_user.employee.id == e.id)),
+        )
+        for e in employees
+    ]
 
 
 @router.get("/{id_or_emp_id}", response_model=EmployeeOut)
@@ -101,10 +123,11 @@ async def get_employee(
     stmt = (
         select(Employee)
         .where(
+            Employee.company_id == current_user.company_id,
             or_(
                 Employee.id == id_or_emp_id,
                 Employee.employee_id == id_or_emp_id,
-            )
+            ),
         )
         .options(selectinload(Employee.salary_structure))
     )
@@ -114,10 +137,16 @@ async def get_employee(
     if not emp:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Employee {id_or_emp_id} not found",
+            detail=f"Employee {id_or_emp_id} not found in this company",
         )
 
-    return employee_to_out(emp)
+    user_role = str(current_user.role.value if hasattr(current_user.role, "value") else current_user.role)
+    is_admin_or_hr = user_role in ["ADMIN", "HR"]
+    can_see_wage = is_admin_or_hr or (
+        current_user.employee and (current_user.employee.id == emp.id or current_user.employee.employee_id == emp.employee_id)
+    )
+
+    return employee_to_out(emp, include_wage=can_see_wage)
 
 
 @router.put("/{id_or_emp_id}", response_model=EmployeeOut)
@@ -130,10 +159,11 @@ async def update_employee(
     stmt = (
         select(Employee)
         .where(
+            Employee.company_id == current_user.company_id,
             or_(
                 Employee.id == id_or_emp_id,
                 Employee.employee_id == id_or_emp_id,
-            )
+            ),
         )
         .options(selectinload(Employee.salary_structure))
     )
@@ -143,7 +173,7 @@ async def update_employee(
     if not emp:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Employee {id_or_emp_id} not found",
+            detail=f"Employee {id_or_emp_id} not found in this company",
         )
 
     user_role = str(current_user.role.value if hasattr(current_user.role, "value") else current_user.role)
@@ -185,7 +215,12 @@ async def update_employee(
     await db.refresh(emp)
 
     # Reload with salary_structure
-    stmt_reload = select(Employee).where(Employee.id == emp.id).options(selectinload(Employee.salary_structure))
+    stmt_reload = (
+        select(Employee)
+        .where(Employee.id == emp.id, Employee.company_id == current_user.company_id)
+        .options(selectinload(Employee.salary_structure))
+    )
     emp_reloaded = (await db.execute(stmt_reload)).scalar_one()
 
     return employee_to_out(emp_reloaded)
+

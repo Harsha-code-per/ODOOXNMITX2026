@@ -23,18 +23,21 @@ def get_password_hash(password: str) -> str:
 def create_access_token(
     subject: Union[str, Any],
     role: str,
+    company_id: Optional[str] = None,
     expires_delta: Optional[timedelta] = None,
 ) -> str:
+    now = datetime.now(timezone.utc)
     if expires_delta:
-        expire = datetime.now(timezone.utc) + expires_delta
+        expire = now + expires_delta
     else:
-        expire = datetime.now(timezone.utc) + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+        expire = now + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
 
     to_encode = {
         "sub": str(subject),
         "role": role,
+        "company_id": str(company_id) if company_id else None,
         "exp": expire,
-        "iat": datetime.now(timezone.utc),
+        "iat": int(now.timestamp()),
     }
     encoded_jwt = jwt.encode(
         to_encode,
@@ -42,6 +45,7 @@ def create_access_token(
         algorithm=settings.JWT_ALGORITHM,
     )
     return encoded_jwt
+
 
 
 def decode_access_token(token: str) -> Optional[dict]:

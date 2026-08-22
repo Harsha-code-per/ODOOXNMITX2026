@@ -2,6 +2,7 @@ import asyncio
 from datetime import date, datetime, timedelta, timezone
 from sqlalchemy import select
 from app.database import engine, async_session_factory, Base
+from app.models.company import Company
 from app.models.profile import Profile, UserRole
 from app.models.employee import Employee, EmployeeStatus
 from app.models.attendance import Attendance, AttendanceStatus
@@ -11,6 +12,7 @@ from app.models.notification import Notification
 from app.core.security import get_password_hash
 from app.services.payroll_service import calculate_salary_structure
 
+DEFAULT_COMPANY_ID = "cccccccc-cccc-cccc-cccc-cccccccccccc"
 DEFAULT_PASSWORD = "password123"
 
 PERSONAS = [
@@ -99,45 +101,45 @@ PERSONAS = [
         "joining_date": date(2023, 6, 1),
         "status": EmployeeStatus.ACTIVE,
         "avatar_url": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150",
-        "address": "12 Folsom St, San Francisco, CA",
-        "emergency_contact": {"name": "Grace Chen", "relationship": "Mother", "phone": "+1 555-0502"},
-        "wage": 70000.0,
+        "address": "720 Haight St, San Francisco, CA",
+        "emergency_contact": {"name": "Grace Chen", "relationship": "Spouse", "phone": "+1 555-0502"},
+        "wage": 80000.0,
         "role": UserRole.EMPLOYEE,
     },
     {
         "user_id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa6",
         "emp_id": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb6",
         "employee_id": "EMP-006",
-        "first_name": "Priya",
-        "last_name": "Sharma",
-        "email": "priya.sharma@dayflow.io",
+        "first_name": "Marcus",
+        "last_name": "Vance",
+        "email": "marcus.vance@dayflow.io",
         "phone": "+1 555-0601",
-        "department": "Engineering",
-        "designation": "Backend Engineer",
-        "joining_date": date(2023, 9, 1),
+        "department": "Product",
+        "designation": "VP of Product",
+        "joining_date": date(2022, 8, 1),
         "status": EmployeeStatus.ACTIVE,
-        "avatar_url": "https://images.unsplash.com/photo-1534751516642-a171edd29974?w=150",
-        "address": "310 Bryant St, Palo Alto, CA",
-        "emergency_contact": {"name": "Raj Sharma", "relationship": "Father", "phone": "+1 555-0602"},
-        "wage": 55000.0,
+        "avatar_url": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150",
+        "address": "330 2nd St, San Francisco, CA",
+        "emergency_contact": {"name": "Claire Vance", "relationship": "Spouse", "phone": "+1 555-0602"},
+        "wage": 105000.0,
         "role": UserRole.EMPLOYEE,
     },
     {
         "user_id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa7",
         "emp_id": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb7",
         "employee_id": "EMP-007",
-        "first_name": "Marcus",
-        "last_name": "Vance",
-        "email": "marcus.vance@dayflow.io",
+        "first_name": "Priya",
+        "last_name": "Sharma",
+        "email": "priya.sharma@dayflow.io",
         "phone": "+1 555-0701",
         "department": "Product",
-        "designation": "Principal Product Manager",
-        "joining_date": date(2022, 11, 15),
+        "designation": "Senior Product Manager",
+        "joining_date": date(2023, 1, 10),
         "status": EmployeeStatus.ACTIVE,
-        "avatar_url": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150",
-        "address": "520 Howard St, San Francisco, CA",
-        "emergency_contact": {"name": "Lisa Vance", "relationship": "Spouse", "phone": "+1 555-0702"},
-        "wage": 80000.0,
+        "avatar_url": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150",
+        "address": "512 Folsom St, San Francisco, CA",
+        "emergency_contact": {"name": "Raj Sharma", "relationship": "Father", "phone": "+1 555-0702"},
+        "wage": 78000.0,
         "role": UserRole.EMPLOYEE,
     },
     {
@@ -150,29 +152,29 @@ PERSONAS = [
         "phone": "+1 555-0801",
         "department": "Product",
         "designation": "Lead UI/UX Designer",
-        "joining_date": date(2023, 1, 10),
+        "joining_date": date(2023, 3, 15),
         "status": EmployeeStatus.ON_LEAVE,
-        "avatar_url": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150",
-        "address": "710 Mission St, San Francisco, CA",
+        "avatar_url": "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150",
+        "address": "901 Mission St, San Francisco, CA",
         "emergency_contact": {"name": "Jean Dupont", "relationship": "Brother", "phone": "+1 555-0802"},
-        "wage": 65000.0,
+        "wage": 72000.0,
         "role": UserRole.EMPLOYEE,
     },
     {
         "user_id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa9",
         "emp_id": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb9",
         "employee_id": "EMP-009",
-        "first_name": "Jordan",
-        "last_name": "Bell",
-        "email": "jordan.bell@dayflow.io",
+        "first_name": "Lucas",
+        "last_name": "Meyer",
+        "email": "lucas.meyer@dayflow.io",
         "phone": "+1 555-0901",
         "department": "Sales",
-        "designation": "VP of Enterprise Sales",
-        "joining_date": date(2022, 8, 1),
+        "designation": "Head of Enterprise Sales",
+        "joining_date": date(2022, 11, 1),
         "status": EmployeeStatus.ACTIVE,
-        "avatar_url": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150",
-        "address": "900 Sutter St, San Francisco, CA",
-        "emergency_contact": {"name": "Karen Bell", "relationship": "Spouse", "phone": "+1 555-0902"},
+        "avatar_url": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150",
+        "address": "1200 Grand Ave, Oakland, CA",
+        "emergency_contact": {"name": "Sophie Meyer", "relationship": "Spouse", "phone": "+1 555-0902"},
         "wage": 95000.0,
         "role": UserRole.EMPLOYEE,
     },
@@ -180,13 +182,13 @@ PERSONAS = [
         "user_id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaa10",
         "emp_id": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbb10",
         "employee_id": "EMP-010",
-        "first_name": "Aisha",
+        "first_name": "Amina",
         "last_name": "Khan",
-        "email": "aisha.khan@dayflow.io",
+        "email": "amina.khan@dayflow.io",
         "phone": "+1 555-1001",
         "department": "Marketing",
-        "designation": "Growth & Brand Specialist",
-        "joining_date": date(2023, 11, 1),
+        "designation": "Growth Marketing Lead",
+        "joining_date": date(2023, 5, 1),
         "status": EmployeeStatus.ACTIVE,
         "avatar_url": "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=150",
         "address": "1400 Post St, San Francisco, CA",
@@ -223,6 +225,23 @@ async def seed_database(target_engine=None, target_session_factory=None):
         await conn.run_sync(Base.metadata.create_all)
 
     async with factory() as session:
+        # 1. Seed Default Tenant Company
+        comp_stmt = select(Company).where(Company.id == DEFAULT_COMPANY_ID)
+        comp_res = await session.execute(comp_stmt)
+        company = comp_res.scalar_one_or_none()
+        if not company:
+            company = Company(
+                id=DEFAULT_COMPANY_ID,
+                name="Dayflow Technologies Inc.",
+                slug="dayflow",
+                currency="INR",
+                owner_id="aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1",
+                is_active=True,
+            )
+            session.add(company)
+            await session.flush()
+
+        # 2. Seed Leave Types for default company
         leave_types = [
             ("11111111-1111-1111-1111-111111111101", LeaveTypeEnum.PAID, True, 18, "Annual paid vacation leave"),
             ("11111111-1111-1111-1111-111111111102", LeaveTypeEnum.SICK, True, 10, "Medical and sickness leave"),
@@ -232,12 +251,16 @@ async def seed_database(target_engine=None, target_session_factory=None):
 
         lt_objs = {}
         for lt_id, name, is_paid, alloc, desc in leave_types:
-            stmt = select(LeaveType).where(LeaveType.name == name)
+            stmt = select(LeaveType).where(
+                LeaveType.company_id == DEFAULT_COMPANY_ID,
+                LeaveType.name == name,
+            )
             res = await session.execute(stmt)
             obj = res.scalar_one_or_none()
             if not obj:
                 obj = LeaveType(
                     id=lt_id,
+                    company_id=DEFAULT_COMPANY_ID,
                     name=name,
                     is_paid=is_paid,
                     default_allocation=alloc,
@@ -248,6 +271,7 @@ async def seed_database(target_engine=None, target_session_factory=None):
 
         await session.flush()
 
+        # 3. Seed Profiles and Employees
         print("👤 Seeding Profiles and Employees...")
         password_hash = get_password_hash(DEFAULT_PASSWORD)
 
@@ -259,20 +283,27 @@ async def seed_database(target_engine=None, target_session_factory=None):
             if not profile:
                 profile = Profile(
                     id=p["user_id"],
+                    company_id=DEFAULT_COMPANY_ID,
                     email=p["email"],
                     password_hash=password_hash,
                     role=p["role"],
+                    must_reset_password=False,
+                    is_active=True,
                 )
                 session.add(profile)
                 await session.flush()
 
             # Employee
-            emp_stmt = select(Employee).where(Employee.employee_id == p["employee_id"])
+            emp_stmt = select(Employee).where(
+                Employee.company_id == DEFAULT_COMPANY_ID,
+                Employee.employee_id == p["employee_id"],
+            )
             emp_res = await session.execute(emp_stmt)
             emp = emp_res.scalar_one_or_none()
             if not emp:
                 emp = Employee(
                     id=p["emp_id"],
+                    company_id=DEFAULT_COMPANY_ID,
                     user_id=profile.id,
                     employee_id=p["employee_id"],
                     first_name=p["first_name"],
@@ -291,12 +322,16 @@ async def seed_database(target_engine=None, target_session_factory=None):
                 await session.flush()
 
             # Salary Structure
-            sal_stmt = select(SalaryStructure).where(SalaryStructure.employee_id == emp.id)
+            sal_stmt = select(SalaryStructure).where(
+                SalaryStructure.company_id == DEFAULT_COMPANY_ID,
+                SalaryStructure.employee_id == emp.id,
+            )
             sal_res = await session.execute(sal_stmt)
             sal = sal_res.scalar_one_or_none()
             if not sal:
                 calc = calculate_salary_structure(p["wage"])
                 sal = SalaryStructure(
+                    company_id=DEFAULT_COMPANY_ID,
                     employee_id=emp.id,
                     effective_from=date(2026, 1, 1),
                     **calc,
@@ -305,28 +340,38 @@ async def seed_database(target_engine=None, target_session_factory=None):
 
         await session.flush()
 
+        # 4. Seed Attendance Records
         print("⏰ Seeding Attendance History...")
         today = date.today()
         alex_emp_id = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb3"
         elena_emp_id = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb4"
         chloe_emp_id = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb8"
 
+        def seed_dt(d: date, hour: int, minute: int) -> datetime:
+            return datetime(d.year, d.month, d.day, hour, minute, 0, tzinfo=timezone.utc)
+
         sample_attendances = [
-            (alex_emp_id, today - timedelta(days=4), datetime.now(timezone.utc).replace(hour=9, minute=2), datetime.now(timezone.utc).replace(hour=17, minute=35), 8.55, AttendanceStatus.PRESENT, "Sprint kickoff"),
-            (alex_emp_id, today - timedelta(days=3), datetime.now(timezone.utc).replace(hour=9, minute=15), datetime.now(timezone.utc).replace(hour=18, minute=0), 8.75, AttendanceStatus.PRESENT, "Backend integration"),
-            (alex_emp_id, today - timedelta(days=2), datetime.now(timezone.utc).replace(hour=8, minute=55), datetime.now(timezone.utc).replace(hour=17, minute=30), 8.58, AttendanceStatus.PRESENT, "Feature testing"),
-            (alex_emp_id, today - timedelta(days=1), datetime.now(timezone.utc).replace(hour=9, minute=0), datetime.now(timezone.utc).replace(hour=13, minute=15), 4.25, AttendanceStatus.HALF_DAY, "Dentist appointment"),
-            (alex_emp_id, today, datetime.now(timezone.utc).replace(hour=9, minute=0), None, 0.0, AttendanceStatus.PRESENT, "Checked in for demo"),
-            (elena_emp_id, today - timedelta(days=1), datetime.now(timezone.utc).replace(hour=9, minute=10), datetime.now(timezone.utc).replace(hour=17, minute=40), 8.50, AttendanceStatus.PRESENT, "Design review"),
-            (elena_emp_id, today, datetime.now(timezone.utc).replace(hour=8, minute=45), None, 0.0, AttendanceStatus.PRESENT, "UI polish"),
+            (alex_emp_id, today - timedelta(days=4), seed_dt(today - timedelta(days=4), 9, 2), seed_dt(today - timedelta(days=4), 17, 35), 8.55, AttendanceStatus.PRESENT, "Sprint kickoff"),
+            (alex_emp_id, today - timedelta(days=3), seed_dt(today - timedelta(days=3), 9, 15), seed_dt(today - timedelta(days=3), 18, 0), 8.75, AttendanceStatus.PRESENT, "Backend integration"),
+            (alex_emp_id, today - timedelta(days=2), seed_dt(today - timedelta(days=2), 8, 55), seed_dt(today - timedelta(days=2), 17, 30), 8.58, AttendanceStatus.PRESENT, "Feature testing"),
+            (alex_emp_id, today - timedelta(days=1), seed_dt(today - timedelta(days=1), 9, 0), seed_dt(today - timedelta(days=1), 13, 15), 4.25, AttendanceStatus.HALF_DAY, "Dentist appointment"),
+            (alex_emp_id, today, seed_dt(today, 9, 0), None, 0.0, AttendanceStatus.PRESENT, "Checked in for demo"),
+            (elena_emp_id, today - timedelta(days=1), seed_dt(today - timedelta(days=1), 9, 10), seed_dt(today - timedelta(days=1), 17, 40), 8.50, AttendanceStatus.PRESENT, "Design review"),
+            (elena_emp_id, today, seed_dt(today, 8, 45), None, 0.0, AttendanceStatus.PRESENT, "UI polish"),
             (chloe_emp_id, today, None, None, 0.0, AttendanceStatus.ON_LEAVE, "Approved Vacation"),
         ]
 
         for emp_id, wdate, cin, cout, thours, st, notes in sample_attendances:
-            att_stmt = select(Attendance).where(Attendance.employee_id == emp_id, Attendance.work_date == wdate)
+            att_stmt = select(Attendance).where(
+                Attendance.company_id == DEFAULT_COMPANY_ID,
+                Attendance.employee_id == emp_id,
+                Attendance.work_date == wdate,
+            )
             att_res = await session.execute(att_stmt)
-            if not att_res.scalar_one_or_none():
+            existing_att = att_res.scalar_one_or_none()
+            if not existing_att:
                 att = Attendance(
+                    company_id=DEFAULT_COMPANY_ID,
                     employee_id=emp_id,
                     work_date=wdate,
                     check_in=cin,
@@ -336,7 +381,14 @@ async def seed_database(target_engine=None, target_session_factory=None):
                     notes=notes,
                 )
                 session.add(att)
+            else:
+                existing_att.check_in = cin
+                existing_att.check_out = cout
+                existing_att.total_hours = thours
+                existing_att.status = st
+                existing_att.notes = notes
 
+        # 5. Seed Leave Requests
         print("📝 Seeding Sample Leave Requests...")
         sample_leaves = [
             (alex_emp_id, lt_objs["SICK"].id, today - timedelta(days=10), today - timedelta(days=9), 2, "Flu recovery", LeaveStatus.APPROVED, "Approved by Sarah", "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa2"),
@@ -346,12 +398,14 @@ async def seed_database(target_engine=None, target_session_factory=None):
 
         for emp_id, ltid, sdate, edate, tdays, reason, st, comments, rev_by in sample_leaves:
             l_stmt = select(LeaveRequest).where(
+                LeaveRequest.company_id == DEFAULT_COMPANY_ID,
                 LeaveRequest.employee_id == emp_id,
                 LeaveRequest.start_date == sdate,
             )
             l_res = await session.execute(l_stmt)
             if not l_res.scalar_one_or_none():
                 lr = LeaveRequest(
+                    company_id=DEFAULT_COMPANY_ID,
                     employee_id=emp_id,
                     leave_type_id=ltid,
                     start_date=sdate,
@@ -366,7 +420,7 @@ async def seed_database(target_engine=None, target_session_factory=None):
                 session.add(lr)
 
         await session.commit()
-        print("✅ Database successfully seeded with 11 demo personas, salary structures, and attendance records!")
+        print("✅ Database successfully seeded with Company, 11 demo personas, salary structures, and attendance records!")
 
 
 if __name__ == "__main__":

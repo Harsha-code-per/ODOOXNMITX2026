@@ -1,3 +1,4 @@
+from datetime import timezone
 from typing import List, Optional
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -44,7 +45,10 @@ async def get_current_user(
     stmt = (
         select(Profile)
         .where(Profile.id == user_id)
-        .options(selectinload(Profile.employee).selectinload(Employee.salary_structure))
+        .options(
+            selectinload(Profile.company),
+            selectinload(Profile.employee).selectinload(Employee.salary_structure),
+        )
     )
     result = await db.execute(stmt)
     user = result.scalar_one_or_none()
@@ -56,7 +60,29 @@ async def get_current_user(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Account has been deactivated or disabled",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    token_iat = payload.get("iat")
+    if user.password_changed_at and token_iat is not None:
+        pwd_dt = user.password_changed_at
+        if pwd_dt.tzinfo is None:
+            pwd_dt = pwd_dt.replace(tzinfo=timezone.utc)
+        pwd_changed_ts = int(pwd_dt.timestamp())
+        if token_iat < pwd_changed_ts:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Token has been invalidated due to password change. Please log in again.",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
     return user
+
+
 
 
 def require_roles(allowed_roles: List[str]):

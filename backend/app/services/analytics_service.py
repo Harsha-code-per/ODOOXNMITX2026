@@ -10,17 +10,24 @@ from app.models.leave import LeaveRequest, LeaveStatus
 from app.models.payroll import SalaryStructure
 
 
-async def get_executive_dashboard(db: AsyncSession) -> Dict[str, Any]:
+async def get_executive_dashboard(db: AsyncSession, company_id: str) -> Dict[str, Any]:
     today = date.today()
 
-    # 1. Total employees & salary structures
-    emp_stmt = select(Employee).options(selectinload(Employee.salary_structure))
+    # 1. Total employees & salary structures within company
+    emp_stmt = (
+        select(Employee)
+        .where(Employee.company_id == company_id)
+        .options(selectinload(Employee.salary_structure))
+    )
     emp_res = await db.execute(emp_stmt)
     employees = emp_res.scalars().all()
     total_employees = len(employees)
 
-    # 2. Today's attendance
-    att_stmt = select(Attendance).where(Attendance.work_date == today)
+    # 2. Today's attendance within company
+    att_stmt = select(Attendance).where(
+        Attendance.company_id == company_id,
+        Attendance.work_date == today,
+    )
     att_res = await db.execute(att_stmt)
     today_records = att_res.scalars().all()
 
@@ -28,12 +35,15 @@ async def get_executive_dashboard(db: AsyncSession) -> Dict[str, Any]:
     on_leave_today = sum(1 for e in employees if e.status == EmployeeStatus.ON_LEAVE) or sum(1 for a in today_records if a.status == AttendanceStatus.ON_LEAVE)
     absent_today = max(0, total_employees - present_today - on_leave_today)
 
-    # 3. Pending leave requests
-    leave_stmt = select(func.count(LeaveRequest.id)).where(LeaveRequest.status == LeaveStatus.PENDING)
+    # 3. Pending leave requests within company
+    leave_stmt = select(func.count(LeaveRequest.id)).where(
+        LeaveRequest.company_id == company_id,
+        LeaveRequest.status == LeaveStatus.PENDING,
+    )
     leave_res = await db.execute(leave_stmt)
     pending_leaves = leave_res.scalar() or 0
 
-    # 4. Total Monthly Payroll
+    # 4. Total Monthly Payroll within company
     monthly_payroll_total = 0.0
     dept_map: Dict[str, Dict[str, Any]] = {}
 
@@ -54,13 +64,16 @@ async def get_executive_dashboard(db: AsyncSession) -> Dict[str, Any]:
         for name, data in dept_map.items()
     ]
 
-    # 5. 5-Day Attendance Trends
+    # 5. 5-Day Attendance Trends within company
     attendance_trends: List[Dict[str, Any]] = []
     for i in range(4, -1, -1):
         d = today - timedelta(days=i)
         d_str = d.strftime("%a")  # e.g. Mon, Tue, Wed
 
-        d_stmt = select(Attendance).where(Attendance.work_date == d)
+        d_stmt = select(Attendance).where(
+            Attendance.company_id == company_id,
+            Attendance.work_date == d,
+        )
         d_res = await db.execute(d_stmt)
         d_recs = d_res.scalars().all()
 
@@ -70,8 +83,8 @@ async def get_executive_dashboard(db: AsyncSession) -> Dict[str, Any]:
 
         # Fallback realistic distribution for demo visualization if new DB has few records
         if len(d_recs) == 0:
-            p_count = max(1, total_employees - 1)
-            l_count = 1 if i in [0, 1] else 0
+            p_count = max(1, total_employees - 1) if total_employees > 0 else 0
+            l_count = 1 if i in [0, 1] and total_employees > 1 else 0
             a_count = max(0, total_employees - p_count - l_count)
 
         attendance_trends.append({
@@ -94,3 +107,4 @@ async def get_executive_dashboard(db: AsyncSession) -> Dict[str, Any]:
         "department_distribution": department_distribution,
         "attendance_trends": attendance_trends,
     }
+

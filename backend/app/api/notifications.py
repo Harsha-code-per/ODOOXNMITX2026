@@ -19,7 +19,7 @@ async def list_notifications(
     current_user: Profile = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    return await get_user_notifications(db, current_user.id)
+    return await get_user_notifications(db, current_user.id, current_user.company_id)
 
 
 @router.patch("/{notification_id}/read")
@@ -28,10 +28,13 @@ async def mark_as_read(
     current_user: Profile = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    success = await mark_notification_as_read(db, notification_id, current_user.id)
+    success = await mark_notification_as_read(
+        db, notification_id, current_user.id, current_user.company_id
+    )
     if not success:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Notification not found",
         )
     return {"message": "Notification marked as read", "id": notification_id}
+

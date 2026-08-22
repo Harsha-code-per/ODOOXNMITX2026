@@ -17,6 +17,7 @@ class Attendance(Base):
     __tablename__ = "attendance"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    company_id = Column(String(36), ForeignKey("companies.id", ondelete="CASCADE"), nullable=False, index=True)
     employee_id = Column(String(36), ForeignKey("employees.id", ondelete="CASCADE"), nullable=False, index=True)
     work_date = Column(Date, default=date.today, nullable=False, index=True)
     check_in = Column(DateTime(timezone=True), nullable=True)
@@ -28,8 +29,9 @@ class Attendance(Base):
     updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc), nullable=False)
 
     __table_args__ = (
-        UniqueConstraint("employee_id", "work_date", name="unique_employee_work_date"),
+        UniqueConstraint("company_id", "employee_id", "work_date", name="unique_company_employee_work_date"),
     )
 
     # Relationships
     employee = relationship("Employee", back_populates="attendance_records")
+

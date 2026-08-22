@@ -80,15 +80,19 @@ def calculate_payable_payout(
 
 
 async def get_or_create_salary_structure(
-    db: AsyncSession, employee_id: str, default_wage: float = 60000.0
+    db: AsyncSession, employee_id: str, company_id: str, default_wage: float = 60000.0
 ) -> SalaryStructure:
-    stmt = select(SalaryStructure).where(SalaryStructure.employee_id == employee_id)
+    stmt = select(SalaryStructure).where(
+        SalaryStructure.company_id == company_id,
+        SalaryStructure.employee_id == employee_id,
+    )
     result = await db.execute(stmt)
     structure = result.scalar_one_or_none()
 
     if not structure:
         calc = calculate_salary_structure(default_wage)
         structure = SalaryStructure(
+            company_id=company_id,
             employee_id=employee_id,
             effective_from=date.today(),
             **calc,
@@ -101,11 +105,14 @@ async def get_or_create_salary_structure(
 
 
 async def update_employee_salary(
-    db: AsyncSession, employee_id: str, new_wage: float
+    db: AsyncSession, employee_id: str, company_id: str, new_wage: float
 ) -> SalaryStructure:
     calc = calculate_salary_structure(new_wage)
 
-    stmt = select(SalaryStructure).where(SalaryStructure.employee_id == employee_id)
+    stmt = select(SalaryStructure).where(
+        SalaryStructure.company_id == company_id,
+        SalaryStructure.employee_id == employee_id,
+    )
     result = await db.execute(stmt)
     structure = result.scalar_one_or_none()
 
@@ -125,6 +132,7 @@ async def update_employee_salary(
         structure.updated_at = datetime.now(timezone.utc)
     else:
         structure = SalaryStructure(
+            company_id=company_id,
             employee_id=employee_id,
             effective_from=date.today(),
             **calc,
@@ -137,15 +145,16 @@ async def update_employee_salary(
 
 
 async def get_employee_payroll_summary(
-    db: AsyncSession, employee: Employee
+    db: AsyncSession, employee: Employee, company_id: str
 ) -> Dict[str, Any]:
-    structure = await get_or_create_salary_structure(db, employee.id, default_wage=75000.0)
+    structure = await get_or_create_salary_structure(db, employee.id, company_id, default_wage=75000.0)
 
     # Compute actual attendance stats for current month
     today = date.today()
     start_of_month = date(today.year, today.month, 1)
 
     stmt_att = select(Attendance).where(
+        Attendance.company_id == company_id,
         Attendance.employee_id == employee.id,
         Attendance.work_date >= start_of_month,
         Attendance.work_date <= today,
@@ -165,6 +174,7 @@ async def get_employee_payroll_summary(
         select(LeaveRequest)
         .join(LeaveType)
         .where(
+            LeaveRequest.company_id == company_id,
             LeaveRequest.employee_id == employee.id,
             LeaveRequest.status == LeaveStatus.APPROVED,
             LeaveType.is_paid == True,
@@ -213,3 +223,4 @@ async def get_employee_payroll_summary(
         "net_salary": structure.net_salary,
         "attendance_summary": payable_summary,
     }
+

@@ -245,3 +245,115 @@ async def test_leave_approval_rbac_restriction(client: AsyncClient):
         headers=alex_headers,
     )
     assert appr_res.status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_seed_attendance_timestamps_date_consistency(client: AsyncClient):
+    # Sarah (HR) Login
+    hr_res = await client.post("/api/v1/auth/login", json={
+        "email": "sarah.hr@dayflow.io",
+        "password": "password123",
+    })
+    hr_token = hr_res.json()["access_token"]
+    hr_headers = {"Authorization": f"Bearer {hr_token}"}
+
+    # Query Alex's historical attendance records
+    att_res = await client.get("/api/v1/attendance/EMP-003", headers=hr_headers)
+    assert att_res.status_code == 200
+    records = att_res.json()["records"]
+
+    # Verify that every record has check_in and check_out dates matching work_date exactly
+    for rec in records:
+        work_date_str = rec["work_date"]
+        if rec["check_in"]:
+            check_in_date_str = rec["check_in"][:10]
+            assert check_in_date_str == work_date_str, f"Mismatch: check_in {rec['check_in']} vs work_date {work_date_str}"
+        if rec["check_out"]:
+            check_out_date_str = rec["check_out"][:10]
+            assert check_out_date_str == work_date_str, f"Mismatch: check_out {rec['check_out']} vs work_date {work_date_str}"
+
+
+@pytest.mark.asyncio
+async def test_real_runtime_attendance_check_in_out(client: AsyncClient):
+    # Login as David Chen (EMP-005)
+    david_res = await client.post("/api/v1/auth/login", json={
+        "email": "david.chen@dayflow.io",
+        "password": "password123",
+    })
+    david_token = david_res.json()["access_token"]
+    david_headers = {"Authorization": f"Bearer {david_token}"}
+
+    # 1. Check in
+    cin_res = await client.post(
+        "/api/v1/attendance/check-in",
+        json={"notes": "Real runtime test check-in"},
+        headers=david_headers,
+    )
+    assert cin_res.status_code == 200
+    cin_data = cin_res.json()
+    assert cin_data["status"] == "PRESENT"
+    assert cin_data["work_date"] == cin_data["check_in"][:10]
+
+    # 2. Duplicate check-in should be rejected
+    dup_res = await client.post(
+        "/api/v1/attendance/check-in",
+        json={"notes": "Duplicate"},
+        headers=david_headers,
+    )
+    assert dup_res.status_code == 400
+
+    # 3. Check out
+    cout_res = await client.post(
+        "/api/v1/attendance/check-out",
+        json={"notes": "Real runtime test check-out"},
+        headers=david_headers,
+    )
+    assert cout_res.status_code == 200
+    cout_data = cout_res.json()
+    assert cout_data["check_out"] is not None
+    assert cout_data["work_date"] == cout_data["check_out"][:10]
+    assert cout_data["total_hours"] >= 0.1
+
+
+@pytest.mark.asyncio
+async def test_employee_wage_privacy_and_analytics_rbac(client: AsyncClient):
+    # Alex (Employee) Login
+    alex_res = await client.post("/api/v1/auth/login", json={
+        "email": "alex.rivera@dayflow.io",
+        "password": "password123",
+    })
+    alex_token = alex_res.json()["access_token"]
+    alex_headers = {"Authorization": f"Bearer {alex_token}"}
+
+    # Sarah (HR) Login
+    hr_res = await client.post("/api/v1/auth/login", json={
+        "email": "sarah.hr@dayflow.io",
+        "password": "password123",
+    })
+    hr_token = hr_res.json()["access_token"]
+    hr_headers = {"Authorization": f"Bearer {hr_token}"}
+
+    # 1. Alex querying employees list: colleagues' wages should be masked to 0.0, his own wage visible
+    alex_list_res = await client.get("/api/v1/employees", headers=alex_headers)
+    assert alex_list_res.status_code == 200
+    alex_list = alex_list_res.json()
+    for emp in alex_list:
+        if emp["employee_id"] == "EMP-003":
+            assert emp["wage"] > 0
+        else:
+            assert emp["wage"] == 0.0
+
+    # 2. Sarah (HR) querying employees list: all wages visible
+    hr_list_res = await client.get("/api/v1/employees", headers=hr_headers)
+    assert hr_list_res.status_code == 200
+    hr_list = hr_list_res.json()
+    assert all(e["wage"] > 0 for e in hr_list)
+
+    # 3. Alex attempting to access executive analytics -> 403 Forbidden
+    alex_dash_res = await client.get("/api/v1/analytics/dashboard", headers=alex_headers)
+    assert alex_dash_res.status_code == 403
+
+    # 4. Sarah (HR) accessing executive analytics -> 200 OK
+    hr_dash_res = await client.get("/api/v1/analytics/dashboard", headers=hr_headers)
+    assert hr_dash_res.status_code == 200
+

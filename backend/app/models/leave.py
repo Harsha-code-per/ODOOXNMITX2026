@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime, timezone
 import enum
-from sqlalchemy import Column, String, Date, DateTime, Integer, Boolean, ForeignKey, Enum as SAEnum, Text
+from sqlalchemy import Column, String, Date, DateTime, Integer, Boolean, ForeignKey, Enum as SAEnum, Text, UniqueConstraint
 from sqlalchemy.orm import relationship
 from app.database import Base
 
@@ -21,15 +21,20 @@ class LeaveStatus(str, enum.Enum):
 
 class LeaveType(Base):
     __tablename__ = "leave_types"
+    __table_args__ = (
+        UniqueConstraint("company_id", "name", name="uq_company_leave_type_name"),
+    )
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    name = Column(SAEnum(LeaveTypeEnum, native_enum=False), unique=True, nullable=False)
+    company_id = Column(String(36), ForeignKey("companies.id", ondelete="CASCADE"), nullable=False, index=True)
+    name = Column(SAEnum(LeaveTypeEnum, native_enum=False), nullable=False)
     is_paid = Column(Boolean, default=True, nullable=False)
     default_allocation = Column(Integer, default=12, nullable=False)
     description = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
 
     # Relationships
+    company = relationship("Company", back_populates="leave_types")
     requests = relationship("LeaveRequest", back_populates="leave_type")
 
 
@@ -37,6 +42,7 @@ class LeaveRequest(Base):
     __tablename__ = "leave_requests"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    company_id = Column(String(36), ForeignKey("companies.id", ondelete="CASCADE"), nullable=False, index=True)
     employee_id = Column(String(36), ForeignKey("employees.id", ondelete="CASCADE"), nullable=False, index=True)
     leave_type_id = Column(String(36), ForeignKey("leave_types.id", ondelete="RESTRICT"), nullable=False)
     start_date = Column(Date, nullable=False)
@@ -55,3 +61,4 @@ class LeaveRequest(Base):
     employee = relationship("Employee", back_populates="leave_requests", foreign_keys=[employee_id])
     leave_type = relationship("LeaveType", back_populates="requests")
     reviewer = relationship("Profile", foreign_keys=[reviewed_by])
+

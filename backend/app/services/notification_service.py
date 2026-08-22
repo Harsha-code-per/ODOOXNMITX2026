@@ -5,9 +5,16 @@ from app.models.notification import Notification
 
 
 async def get_user_notifications(
-    db: AsyncSession, user_id: str, unread_only: bool = False
+    db: AsyncSession, user_id: str, company_id: str, unread_only: bool = False
 ) -> List[Notification]:
-    stmt = select(Notification).where(Notification.user_id == user_id).order_by(Notification.created_at.desc())
+    stmt = (
+        select(Notification)
+        .where(
+            Notification.company_id == company_id,
+            Notification.user_id == user_id,
+        )
+        .order_by(Notification.created_at.desc())
+    )
     if unread_only:
         stmt = stmt.where(Notification.is_read == False)
     result = await db.execute(stmt)
@@ -15,9 +22,10 @@ async def get_user_notifications(
 
 
 async def mark_notification_as_read(
-    db: AsyncSession, notification_id: str, user_id: str
+    db: AsyncSession, notification_id: str, user_id: str, company_id: str
 ) -> bool:
     stmt = select(Notification).where(
+        Notification.company_id == company_id,
         Notification.id == notification_id,
         Notification.user_id == user_id,
     )
@@ -28,3 +36,4 @@ async def mark_notification_as_read(
         await db.commit()
         return True
     return False
+

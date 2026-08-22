@@ -37,6 +37,7 @@ async def apply_leave(
     leave_req = await apply_for_leave(
         db=db,
         employee=current_user.employee,
+        company_id=current_user.company_id,
         leave_type_enum=req.leave_type,
         start_date=req.start_date,
         end_date=req.end_date,
@@ -45,7 +46,7 @@ async def apply_leave(
         attachment_url=req.attachment_url,
     )
 
-    items = await list_leave_requests(db, employee_id=current_user.employee.id)
+    items = await list_leave_requests(db, company_id=current_user.company_id, employee_id=current_user.employee.id)
     matched = next((i for i in items if i["id"] == leave_req.id), None)
     return matched or {
         "id": leave_req.id,
@@ -78,8 +79,8 @@ async def get_my_leaves(
             detail="Employee profile not found",
         )
 
-    balances = await get_leave_balances(db, current_user.employee.id)
-    requests = await list_leave_requests(db, employee_id=current_user.employee.id)
+    balances = await get_leave_balances(db, current_user.employee.id, current_user.company_id)
+    requests = await list_leave_requests(db, company_id=current_user.company_id, employee_id=current_user.employee.id)
 
     return LeaveBalanceResponse(
         balances=balances,
@@ -94,7 +95,20 @@ async def list_all_leaves(
     current_user: Profile = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    return await list_leave_requests(db, employee_id=employee_id, status_filter=status_filter)
+    user_role = str(current_user.role.value if hasattr(current_user.role, "value") else current_user.role)
+    if user_role == "EMPLOYEE":
+        if not current_user.employee:
+            return []
+        target_emp_id = current_user.employee.id
+    else:
+        target_emp_id = employee_id
+
+    return await list_leave_requests(
+        db,
+        company_id=current_user.company_id,
+        employee_id=target_emp_id,
+        status_filter=status_filter,
+    )
 
 
 @router.patch("/{leave_id}/approve", response_model=LeaveRequestOut)
@@ -108,12 +122,13 @@ async def approve_leave(
     reviewed = await review_leave_request(
         db=db,
         leave_id=leave_id,
+        company_id=current_user.company_id,
         new_status=LeaveStatus.APPROVED,
         hr_comments=hr_comments,
         reviewer=current_user,
     )
 
-    items = await list_leave_requests(db)
+    items = await list_leave_requests(db, company_id=current_user.company_id)
     matched = next((i for i in items if i["id"] == reviewed.id), None)
     return matched
 
@@ -129,11 +144,13 @@ async def reject_leave(
     reviewed = await review_leave_request(
         db=db,
         leave_id=leave_id,
+        company_id=current_user.company_id,
         new_status=LeaveStatus.REJECTED,
         hr_comments=hr_comments,
         reviewer=current_user,
     )
 
-    items = await list_leave_requests(db)
+    items = await list_leave_requests(db, company_id=current_user.company_id)
     matched = next((i for i in items if i["id"] == reviewed.id), None)
     return matched
+

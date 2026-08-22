@@ -52,12 +52,45 @@ CORS_ORIGINS=["http://localhost:3000","http://localhost:3001","https://dayflow-f
 ENVIRONMENT=development
 ```
 
-### 4. Database Seeding (11 Demo Personas)
+### 4. Database Migrations (Alembic)
+
+Run existing migrations to upgrade the schema to the latest version:
+```bash
+uv run alembic upgrade head
+```
+
+#### Inspect Current Revision:
+```bash
+uv run alembic current
+```
+
+#### View Available Revision Heads:
+```bash
+uv run alembic heads
+```
+
+#### Create a New Migration:
+```bash
+uv run alembic revision -m "description_of_migration"
+# Or autogenerate based on SQLAlchemy models:
+uv run alembic revision --autogenerate -m "description_of_migration"
+```
+
+#### Roll Back / Downgrade:
+```bash
+# Roll back by 1 revision
+uv run alembic downgrade -1
+
+# Roll back to initial base schema
+uv run alembic downgrade base
+```
+
+### 5. Database Seeding (11 Demo Personas)
 ```bash
 uv run python -m app.seed
 ```
 
-### 5. Run the Server
+### 6. Run the Server
 ```bash
 uv run uvicorn app.main:app --reload --port 8000
 ```
@@ -65,10 +98,11 @@ uv run uvicorn app.main:app --reload --port 8000
 - ReDoc Documentation: `http://localhost:8000/redoc`
 - Health Check: `http://localhost:8000/health`
 
-### 6. Run Test Suite
+### 7. Run Test Suite
 ```bash
 uv run pytest -v
 ```
+
 
 ---
 

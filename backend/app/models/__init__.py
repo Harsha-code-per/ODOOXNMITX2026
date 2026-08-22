@@ -1,3 +1,4 @@
+from app.models.company import Company
 from app.models.profile import Profile, UserRole
 from app.models.employee import Employee, EmployeeStatus
 from app.models.attendance import Attendance, AttendanceStatus
@@ -6,6 +7,7 @@ from app.models.payroll import SalaryStructure
 from app.models.notification import Notification
 
 __all__ = [
+    "Company",
     "Profile",
     "UserRole",
     "Employee",
@@ -19,3 +21,4 @@ __all__ = [
     "SalaryStructure",
     "Notification",
 ]
+

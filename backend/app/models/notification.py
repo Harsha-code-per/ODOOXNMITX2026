@@ -9,6 +9,7 @@ class Notification(Base):
     __tablename__ = "notifications"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    company_id = Column(String(36), ForeignKey("companies.id", ondelete="CASCADE"), nullable=False, index=True)
     user_id = Column(String(36), ForeignKey("profiles.id", ondelete="CASCADE"), nullable=False, index=True)
     type = Column(String(50), nullable=False)  # LEAVE_SUBMITTED, LEAVE_APPROVED, LEAVE_REJECTED, etc.
     title = Column(String(255), nullable=False)
@@ -18,3 +19,4 @@ class Notification(Base):
 
     # Relationships
     user = relationship("Profile", back_populates="notifications")
+
