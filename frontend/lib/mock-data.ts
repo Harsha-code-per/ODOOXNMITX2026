@@ -1,6 +1,6 @@
 import { calculateSalaryStructure, calculatePayablePayout, SalaryComponents, PayableSalaryResult } from "./salary-calculator";
 
-export type Role = "ADMIN" | "HR" | "EMPLOYEE";
+export type Role = "SUPER_ADMIN" | "ADMIN" | "HR" | "EMPLOYEE";
 export type EmployeeStatus = "ACTIVE" | "ON_LEAVE" | "TERMINATED";
 export type AttendanceStatus = "PRESENT" | "ABSENT" | "HALF_DAY" | "ON_LEAVE";
 export type LeaveType = "PAID" | "SICK" | "CASUAL" | "UNPAID";
@@ -75,16 +75,119 @@ export interface NotificationItem {
   createdAt: string;
 }
 
+export interface CompanyTenant {
+  id: string;
+  name: string;
+  slug: string;
+  domain: string;
+  plan: "Starter" | "Growth" | "Enterprise";
+  adminName: string;
+  adminEmail: string;
+  employeeCount: number;
+  status: "ACTIVE" | "PENDING_SETUP" | "SUSPENDED";
+  createdAt: string;
+}
+
+export interface CompanyInquiry {
+  id: string;
+  companyName: string;
+  contactName: string;
+  workEmail: string;
+  phone: string;
+  teamSize: string;
+  planInterest: "Starter" | "Growth" | "Enterprise";
+  message: string;
+  status: "NEW" | "PROVISIONED" | "CONTACTED";
+  createdAt: string;
+}
+
 export interface UserSession {
   id: string;
   email: string;
   role: Role;
   employee: Employee;
   token: string;
+  mustChangePassword?: boolean;
+  companyId?: string;
+  companyName?: string;
 }
 
 // ------------------------------------------------------------------------------
-// INITIAL EMPLOYEES DATA (11 Comprehensive Profiles with Zero Stock Image Dependencies)
+// INITIAL CLIENT COMPANIES (Multi-Tenant SaaS)
+// ------------------------------------------------------------------------------
+
+export const INITIAL_COMPANIES: CompanyTenant[] = [
+  {
+    id: "comp-acme-001",
+    name: "Acme Corporation",
+    slug: "acme",
+    domain: "acmecorp.io",
+    plan: "Enterprise",
+    adminName: "Arthur Morgan",
+    adminEmail: "admin@acmecorp.io",
+    employeeCount: 11,
+    status: "ACTIVE",
+    createdAt: "2026-01-15T09:00:00Z",
+  },
+  {
+    id: "comp-nexus-002",
+    name: "Nexus Technologies",
+    slug: "nexus",
+    domain: "nexuscorp.io",
+    plan: "Growth",
+    adminName: "Elena Rostova",
+    adminEmail: "elena@nexuscorp.io",
+    employeeCount: 42,
+    status: "ACTIVE",
+    createdAt: "2026-03-01T10:30:00Z",
+  },
+  {
+    id: "comp-starlight-003",
+    name: "Starlight Media Labs",
+    slug: "starlight",
+    domain: "starlight.design",
+    plan: "Starter",
+    adminName: "Marcus Thorne",
+    adminEmail: "marcus@starlight.design",
+    employeeCount: 18,
+    status: "PENDING_SETUP",
+    createdAt: "2026-08-20T14:15:00Z",
+  },
+];
+
+// ------------------------------------------------------------------------------
+// INITIAL INBOUND SAAS INQUIRIES
+// ------------------------------------------------------------------------------
+
+export const INITIAL_INQUIRIES: CompanyInquiry[] = [
+  {
+    id: "inq-101",
+    companyName: "HyperScale Quantum",
+    contactName: "Vikram Malhotra",
+    workEmail: "vikram@hyperscale.ai",
+    phone: "+1 415-555-8921",
+    teamSize: "50-200",
+    planInterest: "Growth",
+    message: "Looking to replace multiple disjoint spreadsheets with Dayflow dynamic payroll and live attendance.",
+    status: "NEW",
+    createdAt: "2026-08-22T08:45:00Z",
+  },
+  {
+    id: "inq-102",
+    companyName: "Zenith FinTech",
+    contactName: "Claire Dupont",
+    workEmail: "claire@zenithfin.com",
+    phone: "+44 20 7946 0912",
+    teamSize: "200+",
+    planInterest: "Enterprise",
+    message: "Need Indian statutory tax compliance (PF 12%, PT) and role-based access for multi-entity teams.",
+    status: "NEW",
+    createdAt: "2026-08-21T16:20:00Z",
+  },
+];
+
+// ------------------------------------------------------------------------------
+// INITIAL EMPLOYEES DATA (11 Comprehensive Profiles)
 // ------------------------------------------------------------------------------
 
 export const INITIAL_EMPLOYEES: Employee[] = [
@@ -94,16 +197,16 @@ export const INITIAL_EMPLOYEES: Employee[] = [
     employeeId: "EMP-001",
     firstName: "Arthur",
     lastName: "Morgan",
-    email: "admin@dayflow.io",
+    email: "admin@acmecorp.io",
     phone: "+1 555-0101",
     department: "Management",
     designation: "Chief Executive Officer",
-    joiningDate: "2022-01-15",
+    joiningDate: "2022-01-10",
     status: "ACTIVE",
     avatarUrl: "",
-    address: "100 Silicon Ave, San Francisco, CA",
-    emergencyContact: { name: "Mary Morgan", relationship: "Spouse", phone: "+1 555-0102" },
-    wage: 120000,
+    address: "100 Market St, San Francisco, CA",
+    emergencyContact: { name: "Mary Linton", relationship: "Spouse", phone: "+1 555-0102" },
+    wage: 150000,
   },
   {
     id: "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb2",
@@ -111,16 +214,16 @@ export const INITIAL_EMPLOYEES: Employee[] = [
     employeeId: "EMP-002",
     firstName: "Sarah",
     lastName: "Jenkins",
-    email: "sarah.hr@dayflow.io",
+    email: "sarah.hr@acmecorp.io",
     phone: "+1 555-0201",
     department: "Human Resources",
     designation: "HR Director",
     joiningDate: "2022-03-01",
     status: "ACTIVE",
     avatarUrl: "",
-    address: "250 Market St, San Francisco, CA",
+    address: "245 Pine St, San Francisco, CA",
     emergencyContact: { name: "Tom Jenkins", relationship: "Spouse", phone: "+1 555-0202" },
-    wage: 90000,
+    wage: 95000,
   },
   {
     id: "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb3",
@@ -128,33 +231,33 @@ export const INITIAL_EMPLOYEES: Employee[] = [
     employeeId: "EMP-003",
     firstName: "Alex",
     lastName: "Rivera",
-    email: "alex.rivera@dayflow.io",
+    email: "alex.rivera@acmecorp.io",
     phone: "+1 555-0301",
     department: "Engineering",
-    designation: "Senior Full Stack Engineer",
-    joiningDate: "2023-02-10",
+    designation: "Senior Staff Engineer",
+    joiningDate: "2022-06-15",
     status: "ACTIVE",
     avatarUrl: "",
-    address: "450 Pine Street, Berkeley, CA",
-    emergencyContact: { name: "Maria Rivera", relationship: "Sister", phone: "+1 555-0302" },
-    wage: 75000,
+    address: "580 Howard St, San Francisco, CA",
+    emergencyContact: { name: "Elena Rivera", relationship: "Sister", phone: "+1 555-0302" },
+    wage: 110000,
   },
   {
     id: "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb4",
     userId: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa4",
     employeeId: "EMP-004",
-    firstName: "Elena",
-    lastName: "Rostova",
-    email: "elena.rostova@dayflow.io",
+    firstName: "Priya",
+    lastName: "Sharma",
+    email: "priya.sharma@acmecorp.io",
     phone: "+1 555-0401",
     department: "Engineering",
-    designation: "Staff Frontend Architect",
-    joiningDate: "2023-04-15",
+    designation: "Fullstack Architect",
+    joiningDate: "2022-08-01",
     status: "ACTIVE",
     avatarUrl: "",
-    address: "88 Valencia St, San Francisco, CA",
-    emergencyContact: { name: "Dmitri Rostov", relationship: "Brother", phone: "+1 555-0402" },
-    wage: 85000,
+    address: "740 Mission St, San Francisco, CA",
+    emergencyContact: { name: "Raj Sharma", relationship: "Father", phone: "+1 555-0402" },
+    wage: 105000,
   },
   {
     id: "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb5",
@@ -162,50 +265,50 @@ export const INITIAL_EMPLOYEES: Employee[] = [
     employeeId: "EMP-005",
     firstName: "David",
     lastName: "Chen",
-    email: "david.chen@dayflow.io",
+    email: "david.chen@acmecorp.io",
     phone: "+1 555-0501",
     department: "Engineering",
     designation: "DevOps & Cloud Lead",
-    joiningDate: "2023-06-01",
+    joiningDate: "2023-01-15",
     status: "ACTIVE",
     avatarUrl: "",
-    address: "12 Folsom St, San Francisco, CA",
-    emergencyContact: { name: "Grace Chen", relationship: "Mother", phone: "+1 555-0502" },
-    wage: 70000,
+    address: "310 Folsom St, San Francisco, CA",
+    emergencyContact: { name: "Linda Chen", relationship: "Mother", phone: "+1 555-0502" },
+    wage: 98000,
   },
   {
     id: "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb6",
     userId: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa6",
     employeeId: "EMP-006",
-    firstName: "Priya",
-    lastName: "Sharma",
-    email: "priya.sharma@dayflow.io",
+    firstName: "Maya",
+    lastName: "Lin",
+    email: "maya.lin@acmecorp.io",
     phone: "+1 555-0601",
-    department: "Engineering",
-    designation: "Backend Engineer",
-    joiningDate: "2023-09-01",
+    department: "Product",
+    designation: "Principal Product Designer",
+    joiningDate: "2023-03-20",
     status: "ACTIVE",
     avatarUrl: "",
-    address: "310 Bryant St, Palo Alto, CA",
-    emergencyContact: { name: "Raj Sharma", relationship: "Father", phone: "+1 555-0602" },
-    wage: 55000,
+    address: "420 Fremont St, San Francisco, CA",
+    emergencyContact: { name: "Kevin Lin", relationship: "Brother", phone: "+1 555-0602" },
+    wage: 92000,
   },
   {
     id: "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb7",
     userId: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa7",
     employeeId: "EMP-007",
-    firstName: "Marcus",
-    lastName: "Vance",
-    email: "marcus.vance@dayflow.io",
+    firstName: "James",
+    lastName: "Wilson",
+    email: "james.wilson@acmecorp.io",
     phone: "+1 555-0701",
-    department: "Product",
-    designation: "Principal Product Manager",
-    joiningDate: "2022-11-15",
+    department: "Human Resources",
+    designation: "HR Operations Associate",
+    joiningDate: "2023-05-10",
     status: "ACTIVE",
     avatarUrl: "",
-    address: "520 Howard St, San Francisco, CA",
-    emergencyContact: { name: "Lisa Vance", relationship: "Spouse", phone: "+1 555-0702" },
-    wage: 80000,
+    address: "120 Battery St, San Francisco, CA",
+    emergencyContact: { name: "Susan Wilson", relationship: "Mother", phone: "+1 555-0702" },
+    wage: 65000,
   },
   {
     id: "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb8",
@@ -213,33 +316,33 @@ export const INITIAL_EMPLOYEES: Employee[] = [
     employeeId: "EMP-008",
     firstName: "Chloe",
     lastName: "Dupont",
-    email: "chloe.dupont@dayflow.io",
+    email: "chloe.dupont@acmecorp.io",
     phone: "+1 555-0801",
     department: "Product",
-    designation: "Lead UI/UX Designer",
-    joiningDate: "2023-01-10",
-    status: "ON_LEAVE",
+    designation: "Senior Product Manager",
+    joiningDate: "2023-07-01",
+    status: "ACTIVE",
     avatarUrl: "",
-    address: "710 Mission St, San Francisco, CA",
-    emergencyContact: { name: "Jean Dupont", relationship: "Brother", phone: "+1 555-0802" },
-    wage: 65000,
+    address: "880 Harrison St, San Francisco, CA",
+    emergencyContact: { name: "Julien Dupont", relationship: "Spouse", phone: "+1 555-0802" },
+    wage: 96000,
   },
   {
     id: "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb9",
     userId: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa9",
     employeeId: "EMP-009",
-    firstName: "Jordan",
-    lastName: "Bell",
-    email: "jordan.bell@dayflow.io",
+    firstName: "Rahul",
+    lastName: "Verma",
+    email: "rahul.verma@acmecorp.io",
     phone: "+1 555-0901",
     department: "Sales",
-    designation: "VP of Enterprise Sales",
-    joiningDate: "2022-08-01",
+    designation: "Enterprise Account Executive",
+    joiningDate: "2023-09-15",
     status: "ACTIVE",
     avatarUrl: "",
-    address: "900 Sutter St, San Francisco, CA",
-    emergencyContact: { name: "Karen Bell", relationship: "Spouse", phone: "+1 555-0902" },
-    wage: 95000,
+    address: "950 Montgomery St, San Francisco, CA",
+    emergencyContact: { name: "Ananya Verma", relationship: "Spouse", phone: "+1 555-0902" },
+    wage: 88000,
   },
   {
     id: "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbb10",
@@ -247,7 +350,7 @@ export const INITIAL_EMPLOYEES: Employee[] = [
     employeeId: "EMP-010",
     firstName: "Aisha",
     lastName: "Khan",
-    email: "aisha.khan@dayflow.io",
+    email: "aisha.khan@acmecorp.io",
     phone: "+1 555-1001",
     department: "Marketing",
     designation: "Growth & Brand Specialist",
@@ -264,7 +367,7 @@ export const INITIAL_EMPLOYEES: Employee[] = [
     employeeId: "EMP-011",
     firstName: "Liam",
     lastName: "Nelson",
-    email: "liam.nelson@dayflow.io",
+    email: "liam.nelson@acmecorp.io",
     phone: "+1 555-1101",
     department: "Finance",
     designation: "Financial Controller",
@@ -278,30 +381,91 @@ export const INITIAL_EMPLOYEES: Employee[] = [
 ];
 
 // ------------------------------------------------------------------------------
-// PRE-SET JUDGE DEMO PERSONAS
+// PRE-SET DEMO PERSONAS
 // ------------------------------------------------------------------------------
 
 export const DEMO_PERSONAS: Record<string, UserSession> = {
-  alex: {
-    id: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa3",
-    email: "alex.rivera@dayflow.io",
-    role: "EMPLOYEE",
-    employee: INITIAL_EMPLOYEES[2], // Alex Rivera
-    token: "mock-jwt-alex-rivera-employee",
-  },
-  sarah: {
-    id: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa2",
-    email: "sarah.hr@dayflow.io",
-    role: "HR",
-    employee: INITIAL_EMPLOYEES[1], // Sarah Jenkins
-    token: "mock-jwt-sarah-jenkins-hr",
+  superadmin: {
+    id: "dayflow-platform-staff-001",
+    email: "owner@dayflow.io",
+    role: "SUPER_ADMIN",
+    companyId: "dayflow-hq",
+    companyName: "Dayflow Platform HQ",
+    mustChangePassword: false,
+    employee: {
+      id: "platform-emp-001",
+      userId: "dayflow-platform-staff-001",
+      employeeId: "DAYFLOW-001",
+      firstName: "Dayflow",
+      lastName: "Platform Owner",
+      email: "owner@dayflow.io",
+      phone: "+1 800-555-DAYFLOW",
+      department: "Platform Operations",
+      designation: "Platform Administrator",
+      joiningDate: "2026-01-01",
+      status: "ACTIVE",
+      avatarUrl: "",
+      address: "Dayflow HQ, San Francisco, CA",
+      emergencyContact: { name: "Security Desk", relationship: "HQ", phone: "+1 800-555-0000" },
+      wage: 200000,
+    },
+    token: "mock-jwt-dayflow-platform-superadmin",
   },
   admin: {
     id: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1",
-    email: "admin@dayflow.io",
+    email: "admin@acmecorp.io",
     role: "ADMIN",
+    companyId: "comp-acme-001",
+    companyName: "Acme Corporation",
+    mustChangePassword: false,
     employee: INITIAL_EMPLOYEES[0], // Arthur Morgan
     token: "mock-jwt-arthur-morgan-admin",
+  },
+  admin_temp: {
+    id: "temp-admin-nexus-001",
+    email: "ceo@nexuscorp.io",
+    role: "ADMIN",
+    companyId: "comp-nexus-002",
+    companyName: "Nexus Technologies",
+    mustChangePassword: true,
+    employee: {
+      id: "temp-emp-001",
+      userId: "temp-admin-nexus-001",
+      employeeId: "NEX-001",
+      firstName: "Elena",
+      lastName: "Rostova",
+      email: "ceo@nexuscorp.io",
+      phone: "+1 555-8822",
+      department: "Executive",
+      designation: "Founder & CEO",
+      joiningDate: "2026-08-01",
+      status: "ACTIVE",
+      avatarUrl: "",
+      address: "101 Nexus Blvd, San Jose, CA",
+      emergencyContact: { name: "Nexus Desk", relationship: "HQ", phone: "+1 555-8800" },
+      wage: 160000,
+    },
+    token: "mock-jwt-elena-nexus-temp",
+  },
+  sarah: {
+    id: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa2",
+    email: "sarah.hr@acmecorp.io",
+    role: "HR",
+    companyId: "comp-acme-001",
+    companyName: "Acme Corporation",
+    mustChangePassword: false,
+    employee: INITIAL_EMPLOYEES[1], // Sarah Jenkins
+    token: "mock-jwt-sarah-jenkins-hr",
+  },
+  alex: {
+    id: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa3",
+    email: "alex.rivera@acmecorp.io",
+    role: "EMPLOYEE",
+    companyId: "comp-acme-001",
+    companyName: "Acme Corporation",
+    mustChangePassword: false,
+    employee: INITIAL_EMPLOYEES[2], // Alex Rivera
+    token: "mock-jwt-alex-rivera-employee",
   },
 };
 
@@ -358,7 +522,7 @@ export const INITIAL_ATTENDANCE: AttendanceRecord[] = [
     checkOut: null,
     totalHours: 0.0,
     status: "PRESENT",
-    notes: "Checked in for hackathon demo",
+    notes: "Checked in for work session",
   },
 ];
 
