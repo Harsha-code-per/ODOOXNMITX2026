@@ -4,7 +4,16 @@ import resend
 
 from app.config import settings
 
+import re
+
 logger = logging.getLogger("dayflow.email")
+
+
+def _sanitize_msg(msg: Any) -> str:
+    s = str(msg)
+    s = re.sub(r"Bearer\s+[^\s]+", "Bearer ***REDACTED***", s, flags=re.IGNORECASE)
+    s = re.sub(r"re_[a-zA-Z0-9_]+", "re_***REDACTED***", s)
+    return s
 
 
 class EmailService:
@@ -88,8 +97,9 @@ class EmailService:
             logger.info("Invitation email dispatched via Resend to %s (id: %s)", to_email, res.get("id"))
             return res
         except Exception as exc:
-            logger.error("Failed to send invitation email via Resend to %s: %s", to_email, exc)
-            return {"status": "failed", "error": str(exc)}
+            sanitized_err = _sanitize_msg(exc)
+            logger.error("Failed to send invitation email via Resend to %s: %s", to_email, sanitized_err)
+            return {"status": "failed", "error": sanitized_err}
 
     def send_password_reset_email(
         self,
@@ -152,8 +162,9 @@ class EmailService:
             res = resend.Emails.send(params)
             return res
         except Exception as exc:
-            logger.error("Failed to send password reset email via Resend to %s: %s", to_email, exc)
-            return {"status": "failed", "error": str(exc)}
+            sanitized_err = _sanitize_msg(exc)
+            logger.error("Failed to send password reset email via Resend to %s: %s", to_email, sanitized_err)
+            return {"status": "failed", "error": sanitized_err}
 
 
 email_service = EmailService()

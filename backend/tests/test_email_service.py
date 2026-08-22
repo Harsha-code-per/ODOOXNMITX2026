@@ -74,3 +74,21 @@ def test_email_service_handles_resend_failure_gracefully(mock_send):
 
     assert res["status"] == "failed"
     assert "rate limit exceeded" in res["error"]
+
+
+@patch("resend.Emails.send")
+def test_email_service_masks_secret_in_error(mock_send):
+    mock_send.side_effect = Exception("Authorization error: Bearer re_fake_secret_key_12345 invalid")
+
+    service = EmailService(api_key="re_mock_api_key_123", sender_email="onboarding@dayflow.io")
+    res = service.send_invitation_email(
+        to_email="secret_test@example.com",
+        recipient_name="Secret Test",
+        company_name="Acme Corp",
+        role="EMPLOYEE",
+        activation_link="https://app.dayflow.io/force-password-reset",
+    )
+
+    assert res["status"] == "failed"
+    assert "re_fake_secret_key_12345" not in res["error"]
+    assert "***REDACTED***" in res["error"]

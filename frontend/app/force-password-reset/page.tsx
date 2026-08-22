@@ -32,7 +32,7 @@ export default function ForcePasswordResetPage() {
 
     setIsLoading(true);
     try {
-      await resetPermanentPassword(newPassword);
+      await resetPermanentPassword(newPassword, tempPassword);
       toast.success("Account activated successfully!", {
         description: "Redirecting to your company workspace...",
       });

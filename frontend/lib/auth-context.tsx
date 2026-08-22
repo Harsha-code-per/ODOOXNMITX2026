@@ -12,7 +12,7 @@ interface AuthContextType {
   logout: () => void;
   switchPersona: (personaKey: "superadmin" | "admin" | "admin_temp" | "sarah" | "alex") => void;
   updateCurrentUserEmployee: (updates: Partial<Employee>) => void;
-  resetPermanentPassword: (newPassword: string) => Promise<void>;
+  resetPermanentPassword: (newPassword: string, oldPassword?: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -64,11 +64,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const resetPermanentPassword = async (newPassword: string) => {
+  const resetPermanentPassword = async (newPassword: string, oldPassword?: string) => {
     if (!user) throw new Error("No active session");
     setIsLoading(true);
     try {
-      await DayflowApiClient.resetPassword(user.email, newPassword);
+      await DayflowApiClient.changePassword(oldPassword || "password123", newPassword);
       const updatedUser: UserSession = {
         ...user,
         mustChangePassword: false,
@@ -79,7 +79,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         description: "Your account is now active.",
       });
     } catch (e: any) {
-      toast.error(e.message || "Password reset failed");
+      toast.error(e.message || "Password update failed");
       throw e;
     } finally {
       setIsLoading(false);

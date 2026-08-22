@@ -5,6 +5,7 @@ from app.models.attendance import Attendance, AttendanceStatus
 from app.models.leave import LeaveType, LeaveRequest, LeaveTypeEnum, LeaveStatus
 from app.models.payroll import SalaryStructure
 from app.models.notification import Notification
+from app.models.inquiry import Inquiry
 
 __all__ = [
     "Company",
@@ -20,5 +21,6 @@ __all__ = [
     "LeaveStatus",
     "SalaryStructure",
     "Notification",
+    "Inquiry",
 ]
 

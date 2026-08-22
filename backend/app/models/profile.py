@@ -7,6 +7,7 @@ from app.database import Base
 
 
 class UserRole(str, enum.Enum):
+    SUPER_ADMIN = "SUPER_ADMIN"
     ADMIN = "ADMIN"
     HR = "HR"
     EMPLOYEE = "EMPLOYEE"
@@ -16,7 +17,7 @@ class Profile(Base):
     __tablename__ = "profiles"
 
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    company_id = Column(String(36), ForeignKey("companies.id", ondelete="CASCADE"), nullable=False, index=True)
+    company_id = Column(String(36), ForeignKey("companies.id", ondelete="CASCADE"), nullable=True, index=True)
     email = Column(String(255), unique=True, nullable=False, index=True)
     password_hash = Column(String(255), nullable=False)
     role = Column(SAEnum(UserRole, native_enum=False), nullable=False, default=UserRole.EMPLOYEE)

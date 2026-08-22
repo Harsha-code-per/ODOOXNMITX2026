@@ -419,8 +419,29 @@ async def seed_database(target_engine=None, target_session_factory=None):
                 )
                 session.add(lr)
 
+        # 6. Seed Platform Super Admin
+        print("👑 Seeding Platform Super Admin...")
+        super_admin_stmt = select(Profile).where(Profile.email == "owner@dayflow.io")
+        super_admin_res = await session.execute(super_admin_stmt)
+        super_admin = super_admin_res.scalar_one_or_none()
+        if not super_admin:
+            super_admin = Profile(
+                id="00000000-0000-0000-0000-000000000001",
+                company_id=None,
+                email="owner@dayflow.io",
+                password_hash=get_password_hash("DayflowPlatform#2026"),
+                role=UserRole.SUPER_ADMIN,
+                is_active=True,
+                must_reset_password=False,
+            )
+            session.add(super_admin)
+        else:
+            super_admin.role = UserRole.SUPER_ADMIN
+            super_admin.password_hash = get_password_hash("DayflowPlatform#2026")
+            super_admin.is_active = True
+
         await session.commit()
-        print("✅ Database successfully seeded with Company, 11 demo personas, salary structures, and attendance records!")
+        print("✅ Database successfully seeded with Company, 11 demo personas, salary structures, attendance records, and Super Admin!")
 
 
 if __name__ == "__main__":

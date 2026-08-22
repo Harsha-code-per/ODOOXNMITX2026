@@ -13,6 +13,10 @@ class PasswordChangeRequest(BaseModel):
     new_password: str
 
 
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+
 class RegisterRequest(BaseModel):
     employee_id: str
     email: EmailStr

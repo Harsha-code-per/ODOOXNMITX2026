@@ -16,6 +16,7 @@ from app.services.email_service import email_service
 from app.schemas.auth import (
     LoginRequest,
     PasswordChangeRequest,
+    ForgotPasswordRequest,
     RegisterRequest,
     TokenResponse,
     UserOut,
@@ -114,6 +115,33 @@ async def change_password(
 
     await db.commit()
     return {"message": "Password updated successfully. Previous sessions invalidated."}
+
+
+@router.post("/forgot-password")
+async def forgot_password(
+    req: ForgotPasswordRequest,
+    db: AsyncSession = Depends(get_db),
+):
+    stmt = (
+        select(Profile)
+        .where(Profile.email == req.email.lower())
+        .options(selectinload(Profile.employee))
+    )
+    result = await db.execute(stmt)
+    profile = result.scalar_one_or_none()
+
+    # Always return 200 message to prevent account enumeration
+    if not profile or not profile.is_active:
+        return {"message": "If this email exists, a password reset link has been dispatched."}
+
+    recipient_name = f"{profile.employee.first_name} {profile.employee.last_name}" if profile.employee else profile.email.split("@")[0]
+    reset_link = f"{settings.APP_BASE_URL}/force-password-reset"
+    email_service.send_password_reset_email(
+        to_email=profile.email,
+        recipient_name=recipient_name,
+        reset_link=reset_link,
+    )
+    return {"message": "If this email exists, a password reset link has been dispatched."}
 
 
 @router.post("/register", response_model=RegisterResponse, status_code=status.HTTP_201_CREATED)

@@ -63,12 +63,17 @@ export default function PlatformAdminPage() {
   }, []);
 
   const loadData = async () => {
-    const [comps, inqs] = await Promise.all([
-      DayflowApiClient.getCompanies(),
-      DayflowApiClient.getInquiries(),
-    ]);
-    setCompanies(comps);
-    setInquiries(inqs);
+    try {
+      const [comps, inqs] = await Promise.all([
+        DayflowApiClient.getCompanies(),
+        DayflowApiClient.getInquiries(),
+      ]);
+      setCompanies(comps);
+      setInquiries(inqs);
+    } catch (e: any) {
+      console.error("Failed to load platform data:", e);
+      toast.error(e.message || "Failed to load platform data");
+    }
   };
 
   const handleProvisionSubmit = async (e: React.FormEvent) => {
