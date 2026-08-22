@@ -12,6 +12,10 @@ import {
   CheckCircle2,
   ShieldCheck,
   ChevronDown,
+  Sparkles,
+  Layers,
+  FileCheck2,
+  Lock,
 } from "lucide-react";
 import Lenis from "lenis";
 import { motion } from "framer-motion";
@@ -100,17 +104,6 @@ export default function LandingPage() {
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             className="max-w-5xl mx-auto flex flex-col items-center"
           >
-            {/* Minimal Tag */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.1, duration: 0.6 }}
-              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/80 backdrop-blur-xl border border-white/80 text-slate-600 text-xs font-medium mb-7 shadow-xs"
-            >
-              <span className="w-2 h-2 rounded-full bg-cyan-500 animate-pulse" />
-              <span>Enterprise Workforce Operating System</span>
-            </motion.div>
-
             {/* Cinematic Main Headline */}
             <h1 className="text-5xl sm:text-7xl lg:text-8xl font-extrabold font-heading text-slate-900 tracking-[-0.04em] leading-[1.03]">
               Every workday, <br />
@@ -384,23 +377,146 @@ export default function LandingPage() {
         </section>
       </main>
 
-      {/* Clean Corporate Footer */}
-      <footer className="w-full bg-white/80 backdrop-blur-md border-t border-slate-200/80 px-6 sm:px-12 py-8 relative z-10 text-xs text-slate-500">
-        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-2.5">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.png" alt="Dayflow Logo" className="h-6 w-6 object-contain" />
-            <span className="font-heading font-bold text-slate-900 text-sm">Dayflow</span>
-            <span className="text-slate-400 ml-2">© 2026 Dayflow Technologies Inc. All rights reserved.</span>
+      {/* Rich Multi-Column Enterprise Footer */}
+      <footer className="w-full bg-white/80 backdrop-blur-xl border-t border-slate-200/80 pt-16 pb-12 px-6 sm:px-12 relative z-10 text-slate-600 font-sans">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 pb-12 border-b border-slate-200/80">
+            {/* Column 1: Brand & Mission Statement (2 cols on lg) */}
+            <div className="lg:col-span-2 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center gap-2.5 mb-4">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src="/logo.png" alt="Dayflow Logo" className="h-7 w-7 object-contain" />
+                  <span className="font-heading font-extrabold text-slate-900 text-xl tracking-tight">
+                    Dayflow
+                  </span>
+                </div>
+                <p className="text-xs sm:text-sm text-slate-500 leading-relaxed max-w-sm">
+                  Next-generation Human Resource Management System engineered for enterprise workforce velocity, real-time presence tracking, and mathematical statutory compliance.
+                </p>
+              </div>
+
+              <div className="mt-6 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-xs font-semibold text-slate-700">All systems operational</span>
+                <span className="text-[11px] text-slate-400 font-mono ml-1">• 99.99% Uptime</span>
+              </div>
+            </div>
+
+            {/* Column 2: Platform Modules */}
+            <div>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900 mb-4 font-heading">
+                Platform
+              </h4>
+              <ul className="flex flex-col gap-2.5 text-xs text-slate-600">
+                <li>
+                  <Link href="/signup" className="hover:text-cyan-700 transition-colors">
+                    Live Attendance Pulse
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/signup" className="hover:text-cyan-700 transition-colors">
+                    Leave Governance Guard
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/signup" className="hover:text-cyan-700 transition-colors">
+                    Dynamic Salary Engine
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/signup" className="hover:text-cyan-700 transition-colors">
+                    Vector Payslip Exporter
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/signup" className="hover:text-cyan-700 transition-colors">
+                    FlowAI Natural Language
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* Column 3: Governance & Security */}
+            <div>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900 mb-4 font-heading">
+                Governance
+              </h4>
+              <ul className="flex flex-col gap-2.5 text-xs text-slate-600">
+                <li className="flex items-center gap-1.5">
+                  <Lock className="w-3 h-3 text-cyan-600" />
+                  <span>Role-Based Access (RBAC)</span>
+                </li>
+                <li className="flex items-center gap-1.5">
+                  <FileCheck2 className="w-3 h-3 text-cyan-600" />
+                  <span>Statutory Tax Audit</span>
+                </li>
+                <li className="flex items-center gap-1.5">
+                  <Layers className="w-3 h-3 text-cyan-600" />
+                  <span>Department Capacity Guard</span>
+                </li>
+                <li className="flex items-center gap-1.5">
+                  <Sparkles className="w-3 h-3 text-cyan-600" />
+                  <span>Biometric Sync Protocol</span>
+                </li>
+                <li>
+                  <span className="text-slate-500">ISO 27001 & SOC-2 Ready</span>
+                </li>
+              </ul>
+            </div>
+
+            {/* Column 4: Access & Resources */}
+            <div>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900 mb-4 font-heading">
+                Access
+              </h4>
+              <ul className="flex flex-col gap-2.5 text-xs text-slate-600">
+                <li>
+                  <Link href="/login" className="hover:text-cyan-700 font-semibold transition-colors">
+                    Sign In to Portal
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/signup" className="hover:text-cyan-700 font-semibold transition-colors">
+                    Employee Registration
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/dashboard/admin" className="hover:text-cyan-700 transition-colors">
+                    HR Management Hub
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/dashboard/employee" className="hover:text-cyan-700 transition-colors">
+                    Employee Self-Service
+                  </Link>
+                </li>
+                <li>
+                  <span className="text-slate-400">API Documentation</span>
+                </li>
+              </ul>
+            </div>
           </div>
 
-          <div className="flex items-center gap-6">
-            <Link href="/login" className="hover:text-slate-900 transition-colors">
-              Sign In
-            </Link>
-            <Link href="/signup" className="hover:text-slate-900 transition-colors">
-              Sign Up
-            </Link>
+          {/* Sub-Footer Row */}
+          <div className="pt-8 flex flex-wrap items-center justify-between gap-4 text-xs text-slate-500">
+            <div className="flex items-center gap-2">
+              <span>© 2026 Dayflow Technologies Inc.</span>
+              <span className="text-slate-300">•</span>
+              <span>All rights reserved.</span>
+            </div>
+
+            <div className="flex items-center gap-6">
+              <span className="hover:text-slate-800 cursor-pointer transition-colors">
+                Privacy Policy
+              </span>
+              <span className="hover:text-slate-800 cursor-pointer transition-colors">
+                Terms of Service
+              </span>
+              <span className="hover:text-slate-800 cursor-pointer transition-colors">
+                Security Architecture
+              </span>
+            </div>
           </div>
         </div>
       </footer>
