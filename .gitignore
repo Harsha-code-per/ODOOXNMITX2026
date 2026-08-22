@@ -37,3 +37,11 @@ yarn-error.log*
 .vscode/
 *.swp
 *.swo
+
+# Database & Testing caches
+*.db
+*.sqlite
+*.sqlite3
+.pytest_cache/
+.coverage
+htmlcov/
