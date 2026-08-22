@@ -29,13 +29,24 @@ if config.config_file_name is not None:
 target_metadata = Base.metadata
 
 
+import os
+
+
 def get_url() -> str:
-    url = config.get_main_option("sqlalchemy.url") or settings.DATABASE_URL
+    url = os.getenv("DATABASE_URL")
+    if not url:
+        url = config.get_main_option("sqlalchemy.url")
+    if not url:
+        url = settings.DATABASE_URL
+    if not url:
+        url = "sqlite+aiosqlite:///./dayflow.db"
+
     if url.startswith("postgres://"):
         url = url.replace("postgres://", "postgresql+asyncpg://", 1)
     elif url.startswith("postgresql://") and not url.startswith("postgresql+asyncpg://"):
         url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
     return url
+
 
 
 

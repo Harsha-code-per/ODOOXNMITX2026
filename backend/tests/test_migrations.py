@@ -13,7 +13,8 @@ async def test_migration_pipeline_and_data_preservation(tmp_path):
     2. Insert pre-existing un-scoped demo records into profiles, employees, etc.
     3. Run upgrade to 0002_multi_tenant_saas.
     4. Verify that data migration populated company_id for all records without data loss.
-    5. Verify downgrade to 0001_initial_schema and re-upgrade to head.
+    5. Run upgrade to 0003_repair_existing_tenant_schema (idempotent head).
+    6. Verify downgrade to 0001_initial_schema and re-upgrade to head.
     """
     test_db_path = str(tmp_path / "migration_test.db")
     db_url = f"sqlite+aiosqlite:///{test_db_path}"
@@ -74,6 +75,49 @@ async def test_migration_pipeline_and_data_preservation(tmp_path):
 
     conn.close()
 
-    # 5. Test Downgrade and Re-upgrade
+    # 5. Upgrade to head (0003_repair_existing_tenant_schema)
+    command.upgrade(alembic_cfg, "head")
+
+    # 6. Test Downgrade and Re-upgrade
     command.downgrade(alembic_cfg, "0001_initial_schema")
     command.upgrade(alembic_cfg, "head")
+
+
+@pytest.mark.asyncio
+async def test_repair_migration_on_inconsistent_database(tmp_path):
+    """
+    Test scenario where database was at 0001, stamped at 0002 without column additions,
+    and 0003_repair_existing_tenant_schema safely fixes all missing columns & backfills.
+    """
+    test_db_path = str(tmp_path / "inconsistent_repair_test.db")
+    db_url = f"sqlite+aiosqlite:///{test_db_path}"
+
+    alembic_cfg = Config("alembic.ini")
+    alembic_cfg.set_main_option("sqlalchemy.url", db_url)
+
+    # 1. Build initial schema
+    command.upgrade(alembic_cfg, "0001_initial_schema")
+
+    # 2. Insert records
+    conn = sqlite3.connect(test_db_path)
+    cur = conn.cursor()
+    cur.execute("INSERT INTO profiles (id, email, password_hash, role) VALUES ('p-100', 'repair@test.io', 'hash', 'HR')")
+    cur.execute("INSERT INTO employees (id, user_id, employee_id, first_name, last_name, email, department, designation) VALUES ('e-100', 'p-100', 'EMP-100', 'Repair', 'Tester', 'repair@test.io', 'HR', 'Manager')")
+    conn.commit()
+    conn.close()
+
+    # 3. Simulate stamp to 0002
+    command.stamp(alembic_cfg, "0002_multi_tenant_saas")
+
+    # 4. Upgrade to 0003_repair_existing_tenant_schema
+    command.upgrade(alembic_cfg, "0003_repair_existing_tenant_schema")
+
+    # 5. Verify repair success
+    conn = sqlite3.connect(test_db_path)
+    cur = conn.cursor()
+    prof = cur.execute("SELECT id, company_id, is_active FROM profiles WHERE id = 'p-100'").fetchone()
+    assert prof[1] == "cccccccc-cccc-cccc-cccc-cccccccccccc"
+    assert prof[2] == 1
+    emp = cur.execute("SELECT id, company_id FROM employees WHERE id = 'e-100'").fetchone()
+    assert emp[1] == "cccccccc-cccc-cccc-cccc-cccccccccccc"
+    conn.close()
