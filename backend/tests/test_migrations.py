@@ -75,7 +75,7 @@ async def test_migration_pipeline_and_data_preservation(tmp_path):
 
     conn.close()
 
-    # 5. Upgrade to head (0003_repair_existing_tenant_schema)
+    # 5. Upgrade to head (0003_repair_tenant_schema)
     command.upgrade(alembic_cfg, "head")
 
     # 6. Test Downgrade and Re-upgrade
@@ -87,7 +87,7 @@ async def test_migration_pipeline_and_data_preservation(tmp_path):
 async def test_repair_migration_on_inconsistent_database(tmp_path):
     """
     Test scenario where database was at 0001, stamped at 0002 without column additions,
-    and 0003_repair_existing_tenant_schema safely fixes all missing columns & backfills.
+    and 0003_repair_tenant_schema safely fixes all missing columns & backfills.
     """
     test_db_path = str(tmp_path / "inconsistent_repair_test.db")
     db_url = f"sqlite+aiosqlite:///{test_db_path}"
@@ -109,8 +109,8 @@ async def test_repair_migration_on_inconsistent_database(tmp_path):
     # 3. Simulate stamp to 0002
     command.stamp(alembic_cfg, "0002_multi_tenant_saas")
 
-    # 4. Upgrade to 0003_repair_existing_tenant_schema
-    command.upgrade(alembic_cfg, "0003_repair_existing_tenant_schema")
+    # 4. Upgrade to 0003_repair_tenant_schema
+    command.upgrade(alembic_cfg, "0003_repair_tenant_schema")
 
     # 5. Verify repair success
     conn = sqlite3.connect(test_db_path)

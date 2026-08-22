@@ -13,17 +13,23 @@ class Settings(BaseSettings):
     # Database
     DATABASE_URL: str = "sqlite+aiosqlite:///./dayflow.db"
 
-    # JWT Authentication
-    JWT_SECRET_KEY: str = "dayflow_super_secret_jwt_key_2026_hackathon"
+    # JWT Authentication (Loaded via Environment Variable JWT_SECRET_KEY)
+    JWT_SECRET_KEY: str = "dev-insecure-secret-key-change-in-production"
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440  # 24 hours
 
-    # CORS
+    # Server & Port
+    PORT: int = 8000
+
+    # Resend Email Service
+    RESEND_API_KEY: str = ""
+    EMAIL_FROM: str = "onboarding@resend.dev"
+    APP_BASE_URL: str = "http://localhost:3000"
+
+    # CORS (Strict environment-driven origins)
     CORS_ORIGINS: Union[List[str], str] = [
         "http://localhost:3000",
         "http://localhost:3001",
-        "https://dayflow-frontend.vercel.app",
-        "*",
     ]
 
     @field_validator("CORS_ORIGINS", mode="before")

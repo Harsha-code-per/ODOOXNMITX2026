@@ -28,29 +28,24 @@ def upgrade() -> None:
         sa.Column('slug', sa.String(length=100), nullable=False),
         sa.Column('currency', sa.String(length=10), server_default='INR', nullable=False),
         sa.Column('owner_id', sa.String(length=36), nullable=True),
-        sa.Column('is_active', sa.Boolean(), server_default=sa.text('1'), nullable=False),
+        sa.Column('is_active', sa.Boolean(), server_default=sa.true(), nullable=False),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
         sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
     )
     op.create_index('ix_companies_slug', 'companies', ['slug'], unique=True)
 
     # 2. Seed Default Company (Idempotent check/insert)
-    companies_table = sa.table(
-        'companies',
-        sa.column('id', sa.String),
-        sa.column('name', sa.String),
-        sa.column('slug', sa.String),
-        sa.column('currency', sa.String),
-        sa.column('owner_id', sa.String),
-        sa.column('is_active', sa.Boolean),
-        sa.column('created_at', sa.DateTime),
-        sa.column('updated_at', sa.DateTime),
-    )
     op.execute(
         f"""
         INSERT INTO companies (id, name, slug, currency, owner_id, is_active, created_at, updated_at)
-        SELECT '{DEFAULT_COMPANY_ID}', 'Dayflow Technologies Inc.', 'dayflow', 'INR', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+        SELECT '{DEFAULT_COMPANY_ID}', 'Dayflow Technologies Inc.', 'dayflow', 'INR', NULL, TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
         WHERE NOT EXISTS (SELECT 1 FROM companies WHERE id = '{DEFAULT_COMPANY_ID}');
+        """
+    )
+    op.execute(
+        f"""
+        UPDATE companies SET owner_id = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1'
+        WHERE id = '{DEFAULT_COMPANY_ID}' AND EXISTS (SELECT 1 FROM profiles WHERE id = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1');
         """
     )
 
@@ -58,8 +53,8 @@ def upgrade() -> None:
     # Profiles
     with op.batch_alter_table('profiles') as batch_op:
         batch_op.add_column(sa.Column('company_id', sa.String(length=36), nullable=True))
-        batch_op.add_column(sa.Column('is_active', sa.Boolean(), server_default=sa.text('1'), nullable=False))
-        batch_op.add_column(sa.Column('must_reset_password', sa.Boolean(), server_default=sa.text('0'), nullable=False))
+        batch_op.add_column(sa.Column('is_active', sa.Boolean(), server_default=sa.true(), nullable=False))
+        batch_op.add_column(sa.Column('must_reset_password', sa.Boolean(), server_default=sa.false(), nullable=False))
         batch_op.add_column(sa.Column('password_changed_at', sa.DateTime(timezone=True), nullable=True))
 
     op.execute(f"UPDATE profiles SET company_id = '{DEFAULT_COMPANY_ID}' WHERE company_id IS NULL;")

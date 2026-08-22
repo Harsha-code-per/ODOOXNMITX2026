@@ -4,6 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from app.config import settings
 from app.database import get_db
 from app.core.security import verify_password, get_password_hash, create_access_token
 from app.core.permissions import get_current_user, require_roles
@@ -11,6 +12,7 @@ from app.models.profile import Profile, UserRole
 from app.models.employee import Employee
 from app.models.payroll import SalaryStructure
 from app.services.payroll_service import calculate_salary_structure
+from app.services.email_service import email_service
 from app.schemas.auth import (
     LoginRequest,
     PasswordChangeRequest,
@@ -203,6 +205,17 @@ async def register(
     db.add(salary)
 
     await db.commit()
+
+    # 4. Dispatch onboarding invitation email
+    company_name = current_user.company.name if current_user.company else "Dayflow Technologies"
+    activation_link = f"{settings.APP_BASE_URL}/force-password-reset"
+    email_service.send_invitation_email(
+        to_email=profile.email,
+        recipient_name=f"{employee.first_name} {employee.last_name}",
+        company_name=company_name,
+        role=target_role.value if hasattr(target_role, "value") else str(target_role),
+        activation_link=activation_link,
+    )
 
     return RegisterResponse(
         message="User onboarded successfully into company",

@@ -74,7 +74,7 @@ def upgrade() -> None:
         'leave_types',
         sa.Column('id', sa.String(length=36), primary_key=True),
         sa.Column('name', sa.Enum('PAID', 'SICK', 'CASUAL', 'UNPAID', name='leavetypeenum'), nullable=False, unique=True),
-        sa.Column('is_paid', sa.Boolean(), server_default=sa.text('1'), nullable=False),
+        sa.Column('is_paid', sa.Boolean(), server_default=sa.true(), nullable=False),
         sa.Column('default_allocation', sa.Integer(), server_default='10', nullable=False),
         sa.Column('description', sa.String(length=255), nullable=True),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
@@ -129,7 +129,7 @@ def upgrade() -> None:
         sa.Column('type', sa.String(length=50), server_default='GENERAL', nullable=False),
         sa.Column('title', sa.String(length=255), nullable=False),
         sa.Column('message', sa.Text(), nullable=False),
-        sa.Column('is_read', sa.Boolean(), server_default=sa.text('0'), nullable=False),
+        sa.Column('is_read', sa.Boolean(), server_default=sa.false(), nullable=False),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
     )
 
