@@ -8,19 +8,21 @@ import { toast } from "sonner";
 interface AuthContextType {
   user: UserSession | null;
   isLoading: boolean;
-  login: (email: string, pass: string) => Promise<void>;
+  login: (email: string, pass: string) => Promise<UserSession>;
   logout: () => void;
-  switchPersona: (personaKey: "alex" | "sarah" | "admin") => void;
+  switchPersona: (personaKey: "superadmin" | "admin" | "admin_temp" | "sarah" | "alex") => void;
   updateCurrentUserEmployee: (updates: Partial<Employee>) => void;
+  resetPermanentPassword: (newPassword: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
   isLoading: true,
-  login: async () => {},
+  login: async () => ({} as UserSession),
   logout: () => {},
   switchPersona: () => {},
   updateCurrentUserEmployee: () => {},
+  resetPermanentPassword: async () => {},
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -33,7 +35,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (saved) {
         setUser(JSON.parse(saved));
       } else {
-        // Default to Alex Rivera (Employee) for rich interactive demo state
+        // Default to Alex Rivera (Employee)
         setUser(DEMO_PERSONAS.alex);
         localStorage.setItem("dayflow_active_user", JSON.stringify(DEMO_PERSONAS.alex));
       }
@@ -44,17 +46,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const login = async (email: string, pass: string) => {
+  const login = async (email: string, pass: string): Promise<UserSession> => {
     setIsLoading(true);
     try {
       const session = await DayflowApiClient.login(email, pass);
       setUser(session);
       localStorage.setItem("dayflow_active_user", JSON.stringify(session));
       toast.success(`Welcome back, ${session.employee.firstName}!`, {
-        description: `Logged in as ${session.role}`,
+        description: `Logged in as ${session.role} at ${session.companyName || "Dayflow"}`,
       });
+      return session;
     } catch (e: any) {
       toast.error(e.message || "Failed to log in");
+      throw e;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const resetPermanentPassword = async (newPassword: string) => {
+    if (!user) throw new Error("No active session");
+    setIsLoading(true);
+    try {
+      await DayflowApiClient.resetPassword(user.email, newPassword);
+      const updatedUser: UserSession = {
+        ...user,
+        mustChangePassword: false,
+      };
+      setUser(updatedUser);
+      localStorage.setItem("dayflow_active_user", JSON.stringify(updatedUser));
+      toast.success("Permanent password set successfully!", {
+        description: "Your account is now active.",
+      });
+    } catch (e: any) {
+      toast.error(e.message || "Password reset failed");
       throw e;
     } finally {
       setIsLoading(false);
@@ -67,20 +92,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     toast.info("Logged out successfully");
   };
 
-  const switchPersona = (personaKey: "alex" | "sarah" | "admin") => {
+  const switchPersona = (personaKey: "superadmin" | "admin" | "admin_temp" | "sarah" | "alex") => {
     const target = DEMO_PERSONAS[personaKey];
     if (target) {
       setUser(target);
       localStorage.setItem("dayflow_active_user", JSON.stringify(target));
-      toast.success(`Switched Persona: ${target.employee.firstName} ${target.employee.lastName}`, {
-        description: `Role: ${target.role} (${target.employee.designation})`,
+      toast.success(`Switched to ${target.employee.firstName} ${target.employee.lastName}`, {
+        description: `Role: ${target.role} • ${target.companyName || "Dayflow"}`,
       });
     }
   };
 
   const updateCurrentUserEmployee = (updates: Partial<Employee>) => {
     if (!user) return;
-    const updatedUser = {
+    const updatedUser: UserSession = {
       ...user,
       employee: {
         ...user.employee,
@@ -100,6 +125,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         logout,
         switchPersona,
         updateCurrentUserEmployee,
+        resetPermanentPassword,
       }}
     >
       {children}
@@ -108,5 +134,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 }
 
 export function useAuth() {
-  return useContext(AuthContext);
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
 }

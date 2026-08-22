@@ -86,10 +86,10 @@ export default function LandingPage() {
           </Link>
 
           <Link
-            href="/signup"
+            href="/contact"
             className="px-4 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-xs transition-all hover:scale-[1.02]"
           >
-            Get Started
+            Contact Sales
           </Link>
         </div>
       </header>
@@ -118,10 +118,10 @@ export default function LandingPage() {
             {/* Primary Action Buttons */}
             <div className="flex flex-wrap items-center justify-center gap-4 mt-9">
               <Link
-                href="/signup"
+                href="/contact"
                 className="flex items-center gap-2 px-8 py-4 rounded-2xl bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-sm sm:text-base shadow-sm transition-all hover:scale-105 active:scale-95"
               >
-                <span>Start Free Trial</span>
+                <span>Contact Sales & Pricing</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
 
@@ -361,10 +361,10 @@ export default function LandingPage() {
 
             <div className="flex flex-wrap items-center justify-center gap-3.5 mt-8">
               <Link
-                href="/signup"
+                href="/contact"
                 className="px-7 py-3.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs sm:text-sm shadow-xs transition-all hover:scale-105 active:scale-95"
               >
-                Create Free Account
+                Contact Sales & Pricing
               </Link>
               <Link
                 href="/login"
@@ -410,27 +410,27 @@ export default function LandingPage() {
               </h4>
               <ul className="flex flex-col gap-2.5 text-xs text-slate-600">
                 <li>
-                  <Link href="/signup" className="hover:text-cyan-700 transition-colors">
+                  <Link href="/contact" className="hover:text-cyan-700 transition-colors">
                     Live Attendance Pulse
                   </Link>
                 </li>
                 <li>
-                  <Link href="/signup" className="hover:text-cyan-700 transition-colors">
+                  <Link href="/contact" className="hover:text-cyan-700 transition-colors">
                     Leave Governance Guard
                   </Link>
                 </li>
                 <li>
-                  <Link href="/signup" className="hover:text-cyan-700 transition-colors">
+                  <Link href="/contact" className="hover:text-cyan-700 transition-colors">
                     Dynamic Salary Engine
                   </Link>
                 </li>
                 <li>
-                  <Link href="/signup" className="hover:text-cyan-700 transition-colors">
+                  <Link href="/contact" className="hover:text-cyan-700 transition-colors">
                     Vector Payslip Exporter
                   </Link>
                 </li>
                 <li>
-                  <Link href="/signup" className="hover:text-cyan-700 transition-colors">
+                  <Link href="/contact" className="hover:text-cyan-700 transition-colors">
                     FlowAI Natural Language
                   </Link>
                 </li>
@@ -477,22 +477,24 @@ export default function LandingPage() {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/signup" className="hover:text-cyan-700 font-semibold transition-colors">
-                    Employee Registration
+                  <Link href="/contact" className="hover:text-cyan-700 font-semibold transition-colors">
+                    Contact & Pricing
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/platform-admin" className="hover:text-cyan-700 font-semibold transition-colors">
+                    Platform Super Admin
                   </Link>
                 </li>
                 <li>
                   <Link href="/dashboard/admin" className="hover:text-cyan-700 transition-colors">
-                    HR Management Hub
+                    Company Admin Hub
                   </Link>
                 </li>
                 <li>
                   <Link href="/dashboard/employee" className="hover:text-cyan-700 transition-colors">
                     Employee Self-Service
                   </Link>
-                </li>
-                <li>
-                  <span className="text-slate-400">API Documentation</span>
                 </li>
               </ul>
             </div>
