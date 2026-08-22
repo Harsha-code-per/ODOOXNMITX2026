@@ -3,26 +3,26 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { DayflowApiClient } from "@/lib/api";
-import { LeaveRequest, LeaveBalance } from "@/lib/mock-data";
+import { LeaveBalance, LeaveRequest } from "@/lib/mock-data";
 import { ApplyLeaveModal } from "@/components/leaves/ApplyLeaveModal";
 import { formatDate } from "@/lib/utils";
-import { Palmtree, Plus, CheckCircle2, Clock, XCircle, Calendar, Sparkles } from "lucide-react";
+import { Palmtree, Plus, Clock, CheckCircle2, XCircle, Calendar, Sparkles } from "lucide-react";
 
 export default function EmployeeLeavesPage() {
   const { user } = useAuth();
-  const [requests, setRequests] = useState<LeaveRequest[]>([]);
-  const [balances, setBalances] = useState<Record<string, LeaveBalance> | null>(null);
-  const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
-
   const employeeId = user?.employee.id || "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb3";
 
-  const refreshData = () => {
-    DayflowApiClient.getLeaveRequests(employeeId).then(setRequests);
+  const [balances, setBalances] = useState<Record<string, LeaveBalance>>({});
+  const [requests, setRequests] = useState<LeaveRequest[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const refresh = () => {
     DayflowApiClient.getLeaveBalances(employeeId).then(setBalances);
+    DayflowApiClient.getLeaveRequests(employeeId).then(setRequests);
   };
 
   useEffect(() => {
-    refreshData();
+    refresh();
   }, [employeeId]);
 
   return (
@@ -30,180 +30,176 @@ export default function EmployeeLeavesPage() {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold font-heading">Leave & Time-Off Management</h1>
-          <p className="text-xs text-slate-400">View your annual leave balances and submit time-off requests.</p>
+          <h1 className="text-xl sm:text-2xl font-bold font-heading text-slate-900">Leave Quota & Requests</h1>
+          <p className="text-xs text-slate-500">
+            Track annual leave allowances, submit time-off applications, and monitor approvals.
+          </p>
         </div>
 
         <button
-          onClick={() => setIsApplyModalOpen(true)}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold text-xs shadow-lg shadow-cyan-500/25 transition-all hover:scale-105"
+          onClick={() => setIsModalOpen(true)}
+          className="flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-xs shadow-md shadow-cyan-500/20 transition-all hover:scale-105"
         >
           <Plus className="w-4 h-4" />
-          <span>Apply for Leave</span>
+          <span>Apply for Time Off</span>
         </button>
       </div>
 
-      {/* Quota Balances 4-Grid */}
+      {/* Quota Balance Cards Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
-        {/* Paid Leave */}
-        <div className="glass-card rounded-2xl p-4 sm:p-5 border border-purple-500/30 flex flex-col justify-between">
-          <div className="flex items-center justify-between mb-2">
-            <span className="font-bold text-purple-400">PAID LEAVE</span>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-300">Annual</span>
-          </div>
-          <div className="my-2">
-            <div className="text-3xl font-extrabold font-mono text-purple-300">
-              {balances?.PAID?.remaining ?? 14}
-            </div>
-            <span className="text-[11px] text-slate-400">
-              Remaining out of {balances?.PAID?.allocated ?? 18} days
+        {/* Paid Annual Leave */}
+        <div className="p-5 rounded-2xl glass-card flex flex-col justify-between">
+          <div className="flex items-center justify-between text-slate-500">
+            <span className="font-bold uppercase tracking-wider text-[10px]">Paid Leave</span>
+            <span className="text-[10px] font-bold text-cyan-800 bg-cyan-50 px-2 py-0.5 rounded-full border border-cyan-200">
+              Annual
             </span>
           </div>
-          <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mt-1">
-            <div
-              className="bg-purple-500 h-full rounded-full"
-              style={{
-                width: `${((balances?.PAID?.used ?? 4) / (balances?.PAID?.allocated ?? 18)) * 100}%`,
-              }}
-            />
+          <div className="my-2">
+            <span className="text-3xl font-extrabold font-mono text-cyan-700">
+              {balances.PAID?.remaining ?? 14}
+            </span>
+            <span className="text-slate-500 ml-1 text-xs">/ {balances.PAID?.allocated ?? 18} Days</span>
+            <div className="w-full bg-slate-100 h-2 rounded-full mt-2 overflow-hidden border border-slate-200">
+              <div
+                className="bg-cyan-600 h-full rounded-full transition-all"
+                style={{
+                  width: `${((balances.PAID?.remaining ?? 14) / (balances.PAID?.allocated ?? 18)) * 100}%`,
+                }}
+              />
+            </div>
           </div>
+          <span className="text-[10px] text-slate-400">4 days used this year</span>
         </div>
 
         {/* Sick Leave */}
-        <div className="glass-card rounded-2xl p-4 sm:p-5 border border-cyan-500/30 cyan-glow-subtle flex flex-col justify-between">
-          <div className="flex items-center justify-between mb-2">
-            <span className="font-bold text-cyan-400">SICK / MEDICAL</span>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300">Medical</span>
-          </div>
-          <div className="my-2">
-            <div className="text-3xl font-extrabold font-mono text-cyan-300">
-              {balances?.SICK?.remaining ?? 8}
-            </div>
-            <span className="text-[11px] text-slate-400">
-              Remaining out of {balances?.SICK?.allocated ?? 10} days
+        <div className="p-5 rounded-2xl glass-card flex flex-col justify-between">
+          <div className="flex items-center justify-between text-slate-500">
+            <span className="font-bold uppercase tracking-wider text-[10px]">Sick Leave</span>
+            <span className="text-[10px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+              Medical
             </span>
           </div>
-          <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mt-1">
-            <div
-              className="bg-cyan-500 h-full rounded-full"
-              style={{
-                width: `${((balances?.SICK?.used ?? 2) / (balances?.SICK?.allocated ?? 10)) * 100}%`,
-              }}
-            />
+          <div className="my-2">
+            <span className="text-3xl font-extrabold font-mono text-emerald-600">
+              {balances.SICK?.remaining ?? 10}
+            </span>
+            <span className="text-slate-500 ml-1 text-xs">/ {balances.SICK?.allocated ?? 12} Days</span>
+            <div className="w-full bg-slate-100 h-2 rounded-full mt-2 overflow-hidden border border-slate-200">
+              <div
+                className="bg-emerald-500 h-full rounded-full transition-all"
+                style={{
+                  width: `${((balances.SICK?.remaining ?? 10) / (balances.SICK?.allocated ?? 12)) * 100}%`,
+                }}
+              />
+            </div>
           </div>
+          <span className="text-[10px] text-slate-400">2 days requested</span>
         </div>
 
         {/* Casual Leave */}
-        <div className="glass-card rounded-2xl p-4 sm:p-5 border border-emerald-500/30 flex flex-col justify-between">
-          <div className="flex items-center justify-between mb-2">
-            <span className="font-bold text-emerald-400">CASUAL TIME OFF</span>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300">Short</span>
-          </div>
-          <div className="my-2">
-            <div className="text-3xl font-extrabold font-mono text-emerald-300">
-              {balances?.CASUAL?.remaining ?? 5}
-            </div>
-            <span className="text-[11px] text-slate-400">
-              Remaining out of {balances?.CASUAL?.allocated ?? 6} days
+        <div className="p-5 rounded-2xl glass-card flex flex-col justify-between">
+          <div className="flex items-center justify-between text-slate-500">
+            <span className="font-bold uppercase tracking-wider text-[10px]">Casual Leave</span>
+            <span className="text-[10px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+              Personal
             </span>
           </div>
-          <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mt-1">
-            <div
-              className="bg-emerald-500 h-full rounded-full"
-              style={{
-                width: `${((balances?.CASUAL?.used ?? 1) / (balances?.CASUAL?.allocated ?? 6)) * 100}%`,
-              }}
-            />
+          <div className="my-2">
+            <span className="text-3xl font-extrabold font-mono text-amber-600">
+              {balances.CASUAL?.remaining ?? 5}
+            </span>
+            <span className="text-slate-500 ml-1 text-xs">/ {balances.CASUAL?.allocated ?? 6} Days</span>
+            <div className="w-full bg-slate-100 h-2 rounded-full mt-2 overflow-hidden border border-slate-200">
+              <div
+                className="bg-amber-500 h-full rounded-full transition-all"
+                style={{
+                  width: `${((balances.CASUAL?.remaining ?? 5) / (balances.CASUAL?.allocated ?? 6)) * 100}%`,
+                }}
+              />
+            </div>
           </div>
+          <span className="text-[10px] text-slate-400">1 day used this year</span>
         </div>
 
         {/* Unpaid Leave */}
-        <div className="glass-card rounded-2xl p-4 sm:p-5 border border-slate-700 flex flex-col justify-between">
-          <div className="flex items-center justify-between mb-2">
-            <span className="font-bold text-slate-400">UNPAID LEAVE</span>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">Statutory</span>
+        <div className="p-5 rounded-2xl glass-card flex flex-col justify-between">
+          <div className="flex items-center justify-between text-slate-500">
+            <span className="font-bold uppercase tracking-wider text-[10px]">Unpaid Leave</span>
+            <span className="text-[10px] font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">
+              Loss of Pay
+            </span>
           </div>
           <div className="my-2">
-            <div className="text-3xl font-extrabold font-mono text-slate-300">
-              {balances?.UNPAID?.used ?? 0}
+            <span className="text-3xl font-extrabold font-mono text-slate-800">
+              {balances.UNPAID?.used ?? 0}
+            </span>
+            <span className="text-slate-500 ml-1 text-xs">Days Used</span>
+            <div className="w-full bg-slate-100 h-2 rounded-full mt-2 overflow-hidden border border-slate-200">
+              <div className="bg-slate-400 h-full rounded-full" style={{ width: "0%" }} />
             </div>
-            <span className="text-[11px] text-slate-400">Days taken this year</span>
           </div>
-          <span className="text-[10px] text-slate-500 mt-1">Directly impacts monthly payable days.</span>
+          <span className="text-[10px] text-slate-400">No salary deduction applied</span>
         </div>
       </div>
 
-      {/* Leave Requests Table */}
-      <div className="glass-panel rounded-2xl p-5 sm:p-6 border border-[var(--border)]">
-        <h3 className="text-sm font-bold text-[var(--foreground)] mb-4 pb-2 border-b border-[var(--border)] flex items-center justify-between">
-          <span>My Leave Applications</span>
-          <span className="text-xs text-slate-400 font-normal">{requests.length} total request(s)</span>
+      {/* Leave Application History */}
+      <div className="glass-panel rounded-3xl p-6 border border-slate-200 shadow-sm overflow-x-auto">
+        <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2 mb-4 pb-3 border-b border-slate-100">
+          <Calendar className="w-4 h-4 text-cyan-600" /> Leave Application Requests & Status
         </h3>
 
-        <div className="overflow-x-auto">
+        {requests.length === 0 ? (
+          <div className="p-8 text-center text-xs text-slate-400">
+            No leave requests submitted yet.
+          </div>
+        ) : (
           <table className="w-full text-left text-xs">
             <thead>
-              <tr className="border-b border-[var(--border)] text-slate-400">
-                <th className="pb-2.5 font-semibold">Leave Type</th>
-                <th className="pb-2.5 font-semibold">Duration</th>
-                <th className="pb-2.5 font-semibold">Total Days</th>
-                <th className="pb-2.5 font-semibold">Reason</th>
-                <th className="pb-2.5 font-semibold">Status</th>
-                <th className="pb-2.5 font-semibold">HR Comments</th>
+              <tr className="border-b border-slate-100 text-slate-400">
+                <th className="pb-3 font-semibold">Leave Type</th>
+                <th className="pb-3 font-semibold">Start Date</th>
+                <th className="pb-3 font-semibold">End Date</th>
+                <th className="pb-3 font-semibold">Total Days</th>
+                <th className="pb-3 font-semibold">Reason</th>
+                <th className="pb-3 font-semibold">HR Comments</th>
+                <th className="pb-3 font-semibold text-right">Decision</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[var(--border)]">
+            <tbody className="divide-y divide-slate-100">
               {requests.map((req) => (
-                <tr key={req.id} className="hover:bg-slate-800/20 transition-colors">
-                  <td className="py-3.5">
-                    <span className="font-bold text-slate-200 block">{req.leaveType}</span>
-                    <span className="text-[10px] text-slate-500">Applied {formatDate(req.createdAt)}</span>
-                  </td>
-                  <td className="py-3.5 text-slate-300 font-mono">
-                    {formatDate(req.startDate)} → {formatDate(req.endDate)}
-                  </td>
-                  <td className="py-3.5 font-mono font-bold text-cyan-400">{req.totalDays} Day(s)</td>
-                  <td className="py-3.5 text-slate-300 max-w-xs leading-relaxed">{req.reason}</td>
-                  <td className="py-3.5">
+                <tr key={req.id} className="hover:bg-slate-50 transition-colors">
+                  <td className="py-3.5 font-bold text-slate-800">{req.leaveType} LEAVE</td>
+                  <td className="py-3.5 font-mono text-slate-600">{formatDate(req.startDate)}</td>
+                  <td className="py-3.5 font-mono text-slate-600">{formatDate(req.endDate)}</td>
+                  <td className="py-3.5 font-mono font-bold text-cyan-700">{req.totalDays} Days</td>
+                  <td className="py-3.5 text-slate-600 italic max-w-xs truncate">{req.reason}</td>
+                  <td className="py-3.5 text-slate-500">{req.hrComments || "—"}</td>
+                  <td className="py-3.5 text-right">
                     <span
-                      className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold ${
+                      className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
                         req.status === "APPROVED"
-                          ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30"
+                          ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
                           : req.status === "PENDING"
-                          ? "bg-amber-500/10 text-amber-400 border border-amber-500/30"
-                          : "bg-rose-500/10 text-rose-400 border border-rose-500/30"
+                          ? "bg-amber-50 text-amber-700 border border-amber-200"
+                          : "bg-rose-50 text-rose-700 border border-rose-200"
                       }`}
                     >
-                      {req.status === "APPROVED" ? (
-                        <CheckCircle2 className="w-3 h-3" />
-                      ) : req.status === "PENDING" ? (
-                        <Clock className="w-3 h-3" />
-                      ) : (
-                        <XCircle className="w-3 h-3" />
-                      )}
-                      <span>{req.status}</span>
+                      {req.status}
                     </span>
-                  </td>
-                  <td className="py-3.5 text-slate-400 italic text-[11px]">
-                    {req.hrComments ? (
-                      <span>&quot;{req.hrComments}&quot;</span>
-                    ) : req.status === "PENDING" ? (
-                      <span className="text-amber-400/80">Pending HR Review</span>
-                    ) : (
-                      "—"
-                    )}
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-        </div>
+        )}
       </div>
 
       <ApplyLeaveModal
-        isOpen={isApplyModalOpen}
-        onClose={() => setIsApplyModalOpen(false)}
-        onSubmitted={refreshData}
+        employeeId={employeeId}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onApplied={refresh}
       />
     </div>
   );

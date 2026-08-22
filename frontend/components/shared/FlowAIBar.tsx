@@ -61,30 +61,30 @@ export function FlowAIBar({ isOpen, onClose }: FlowAIBarProps) {
           actionRoute: "/dashboard/admin",
         });
       }
-    }, 600);
+    }, 500);
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in">
-      <div className="w-full max-w-xl glass-panel rounded-2xl border border-cyan-500/40 shadow-2xl p-4 sm:p-6 overflow-hidden relative">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md animate-in fade-in">
+      <div className="w-full max-w-xl glass-panel rounded-3xl border border-cyan-300 shadow-2xl p-6 sm:p-7 overflow-hidden relative">
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-slate-200"
+          className="absolute top-5 right-5 p-1.5 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors"
         >
-          <X className="w-4 h-4" />
+          <X className="w-5 h-5" />
         </button>
 
         {/* Title */}
-        <div className="flex items-center gap-2.5 mb-4">
-          <div className="p-2 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">
-            <Sparkles className="w-5 h-5 animate-pulse" />
+        <div className="flex items-center gap-3 mb-5">
+          <div className="p-2.5 rounded-2xl bg-cyan-50 text-cyan-600 border border-cyan-200 shadow-xs">
+            <Sparkles className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-base font-bold text-[var(--foreground)] flex items-center gap-1.5">
-              FlowAI Copilot <span className="text-[10px] px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300">Fast Insights</span>
+            <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+              FlowAI Copilot <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-100 text-cyan-800 font-bold border border-cyan-200">Fast Insights</span>
             </h3>
-            <p className="text-xs text-slate-400">Ask any question about employees, attendance, leaves, or payroll.</p>
+            <p className="text-xs text-slate-500">Ask any question about employees, attendance, leaves, or payroll.</p>
           </div>
         </div>
 
@@ -101,60 +101,60 @@ export function FlowAIBar({ isOpen, onClose }: FlowAIBarProps) {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="e.g. Who is on leave next week? Or check payroll spend..."
-            className="w-full px-4 py-3 pr-12 rounded-xl bg-slate-900/80 border border-cyan-500/30 text-xs sm:text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
+            className="w-full px-4 py-3 pr-12 rounded-2xl bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20"
             autoFocus
           />
           <button
             type="submit"
             disabled={!query.trim() || isThinking}
-            className="absolute right-2 p-2 rounded-lg bg-cyan-500 hover:bg-cyan-400 disabled:opacity-50 text-slate-950 transition-colors"
+            className="absolute right-2.5 p-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 text-white transition-colors shadow-xs"
           >
             <Send className="w-4 h-4" />
           </button>
         </form>
 
         {/* Quick Suggestion Chips */}
-        <div className="flex flex-wrap gap-1.5 mb-4">
+        <div className="flex flex-wrap gap-2 mb-4">
           <button
             onClick={() => handleAsk("Who is on leave next week?")}
-            className="px-2.5 py-1 rounded-lg bg-slate-800/60 hover:bg-slate-700/60 text-[11px] text-cyan-300 border border-slate-700/50 flex items-center gap-1 transition-colors"
+            className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-cyan-50 hover:text-cyan-800 text-[11px] text-slate-700 border border-slate-200 flex items-center gap-1.5 transition-colors font-medium"
           >
-            <Calendar className="w-3 h-3 text-cyan-400" /> Who is on leave?
+            <Calendar className="w-3.5 h-3.5 text-cyan-600" /> Who is on leave?
           </button>
           <button
             onClick={() => handleAsk("Check today's attendance rate")}
-            className="px-2.5 py-1 rounded-lg bg-slate-800/60 hover:bg-slate-700/60 text-[11px] text-cyan-300 border border-slate-700/50 flex items-center gap-1 transition-colors"
+            className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-cyan-50 hover:text-cyan-800 text-[11px] text-slate-700 border border-slate-200 flex items-center gap-1.5 transition-colors font-medium"
           >
-            <UserCheck className="w-3 h-3 text-emerald-400" /> Today&apos;s Attendance
+            <UserCheck className="w-3.5 h-3.5 text-emerald-600" /> Today&apos;s Attendance
           </button>
           <button
             onClick={() => handleAsk("Total monthly payroll spend")}
-            className="px-2.5 py-1 rounded-lg bg-slate-800/60 hover:bg-slate-700/60 text-[11px] text-cyan-300 border border-slate-700/50 flex items-center gap-1 transition-colors"
+            className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-cyan-50 hover:text-cyan-800 text-[11px] text-slate-700 border border-slate-200 flex items-center gap-1.5 transition-colors font-medium"
           >
-            <DollarSign className="w-3 h-3 text-amber-400" /> Total Payroll Cost
+            <DollarSign className="w-3.5 h-3.5 text-amber-600" /> Total Payroll Cost
           </button>
         </div>
 
         {/* Thinking State */}
         {isThinking && (
-          <div className="p-4 rounded-xl bg-slate-900/60 border border-[var(--border)] flex items-center gap-3 animate-pulse">
-            <Bot className="w-5 h-5 text-cyan-400 animate-spin" />
-            <span className="text-xs text-slate-300">Analyzing HR records and computing metrics...</span>
+          <div className="p-4 rounded-2xl bg-cyan-50 border border-cyan-200 flex items-center gap-3 animate-pulse">
+            <Bot className="w-5 h-5 text-cyan-600 animate-spin" />
+            <span className="text-xs text-cyan-900 font-medium">Analyzing HR records and computing live metrics...</span>
           </div>
         )}
 
         {/* Response Box */}
         {response && (
-          <div className="p-4 rounded-xl bg-cyan-950/20 border border-cyan-500/30 text-xs animate-in fade-in">
-            <h4 className="font-bold text-cyan-400 text-sm mb-1">{response.title}</h4>
-            <p className="text-slate-200 leading-relaxed mb-3">{response.text}</p>
+          <div className="p-4 rounded-2xl bg-cyan-50/80 border border-cyan-200 text-xs animate-in fade-in">
+            <h4 className="font-bold text-cyan-900 text-sm mb-1">{response.title}</h4>
+            <p className="text-slate-700 leading-relaxed mb-3">{response.text}</p>
             {response.actionRoute && (
               <button
                 onClick={() => {
                   onClose();
                   router.push(response.actionRoute);
                 }}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs transition-colors"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs transition-colors shadow-sm"
               >
                 <span>{response.actionText}</span>
                 <ArrowRight className="w-3.5 h-3.5" />

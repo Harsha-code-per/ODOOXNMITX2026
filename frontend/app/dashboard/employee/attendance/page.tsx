@@ -4,140 +4,128 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { DayflowApiClient } from "@/lib/api";
 import { AttendanceRecord } from "@/lib/mock-data";
-import { LiveTimerPulse } from "@/components/attendance/LiveTimerPulse";
 import { formatDate, formatTime } from "@/lib/utils";
-import { Clock, CalendarCheck, CheckCircle2, AlertCircle, Filter, Sparkles } from "lucide-react";
+import { CalendarCheck, Clock, Filter, CheckCircle2, AlertCircle } from "lucide-react";
 
 export default function EmployeeAttendancePage() {
   const { user } = useAuth();
-  const [records, setRecords] = useState<AttendanceRecord[]>([]);
-  const [statusFilter, setStatusFilter] = useState<string>("ALL");
-
   const employeeId = user?.employee.id || "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbb3";
-
-  const fetchRecords = () => {
-    DayflowApiClient.getAttendanceHistory(employeeId).then(setRecords);
-  };
+  const [logs, setLogs] = useState<AttendanceRecord[]>([]);
+  const [filter, setFilter] = useState<string>("ALL");
 
   useEffect(() => {
-    fetchRecords();
+    DayflowApiClient.getAttendanceHistory(employeeId).then(setLogs);
   }, [employeeId]);
 
-  const filtered = statusFilter === "ALL" ? records : records.filter((r) => r.status === statusFilter);
-
-  const presentCount = records.filter((r) => r.status === "PRESENT").length;
-  const halfDayCount = records.filter((r) => r.status === "HALF_DAY").length;
-  const totalHours = records.reduce((sum, r) => sum + (r.totalHours || 0), 0);
+  const filteredLogs = filter === "ALL" ? logs : logs.filter((l) => l.status === filter);
+  const totalHours = logs.reduce((sum, l) => sum + (l.totalHours || 0), 0);
 
   return (
     <div className="flex flex-col gap-6 animate-in fade-in">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold font-heading">My Attendance Log</h1>
-          <p className="text-xs text-slate-400">Track your daily clock-ins, duration, and working hours.</p>
+          <h1 className="text-xl sm:text-2xl font-bold font-heading text-slate-900">Attendance Logbook</h1>
+          <p className="text-xs text-slate-500">
+            Official shift logs, timestamps, and biometric presence records.
+          </p>
+        </div>
+
+        {/* Filter Pills */}
+        <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-white border border-slate-200 shadow-xs text-xs">
+          {["ALL", "PRESENT", "HALF_DAY"].map((f) => (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className={`px-3 py-1.5 rounded-xl font-bold transition-all ${
+                filter === f
+                  ? "bg-cyan-600 text-white shadow-xs"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+              }`}
+            >
+              {f}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Grid: Live Stopwatch + Metrics */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1">
-          <LiveTimerPulse onRecordUpdated={fetchRecords} />
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+        <div className="p-5 rounded-2xl glass-card">
+          <span className="text-slate-500 font-bold uppercase tracking-wider text-[10px] block">
+            Total Hours Logged (Aug)
+          </span>
+          <span className="text-3xl font-extrabold font-mono text-slate-900 mt-1 block">
+            {totalHours.toFixed(1)} hrs
+          </span>
+          <span className="text-[11px] text-emerald-600 font-semibold mt-1 block">
+            Average: 8.5 hrs / work day
+          </span>
         </div>
-
-        {/* Metrics Row */}
-        <div className="lg:col-span-2 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-          <div className="p-4 rounded-2xl glass-card border border-[var(--border)] flex flex-col justify-between">
-            <span className="text-slate-400 font-semibold">Total Days</span>
-            <span className="text-2xl font-extrabold font-mono text-slate-100">{records.length}</span>
-            <span className="text-[10px] text-slate-500">August 2026</span>
-          </div>
-          <div className="p-4 rounded-2xl glass-card border border-[var(--border)] flex flex-col justify-between">
-            <span className="text-emerald-400 font-semibold">Present Days</span>
-            <span className="text-2xl font-extrabold font-mono text-emerald-400">{presentCount}</span>
-            <span className="text-[10px] text-slate-500">Full shifts</span>
-          </div>
-          <div className="p-4 rounded-2xl glass-card border border-[var(--border)] flex flex-col justify-between">
-            <span className="text-amber-400 font-semibold">Half Days</span>
-            <span className="text-2xl font-extrabold font-mono text-amber-400">{halfDayCount}</span>
-            <span className="text-[10px] text-slate-500">&lt; 5 hours</span>
-          </div>
-          <div className="p-4 rounded-2xl glass-card border border-cyan-500/20 cyan-glow-subtle flex flex-col justify-between">
-            <span className="text-cyan-400 font-semibold">Total Hours</span>
-            <span className="text-2xl font-extrabold font-mono text-cyan-300">{totalHours.toFixed(1)}</span>
-            <span className="text-[10px] text-slate-500">Avg 8.4h / day</span>
-          </div>
+        <div className="p-5 rounded-2xl glass-card cyan-glow-subtle border-cyan-200">
+          <span className="text-cyan-800 font-bold uppercase tracking-wider text-[10px] block">
+            Present Work Days
+          </span>
+          <span className="text-3xl font-extrabold font-mono text-cyan-700 mt-1 block">
+            {logs.filter((l) => l.status === "PRESENT").length} Days
+          </span>
+          <span className="text-[11px] text-slate-500 mt-1 block">Out of 22 scheduled workdays</span>
+        </div>
+        <div className="p-5 rounded-2xl glass-card">
+          <span className="text-slate-500 font-bold uppercase tracking-wider text-[10px] block">
+            Half-Days Logged
+          </span>
+          <span className="text-3xl font-extrabold font-mono text-amber-600 mt-1 block">
+            {logs.filter((l) => l.status === "HALF_DAY").length} Day
+          </span>
+          <span className="text-[11px] text-slate-500 mt-1 block">Aug 21 (Dentist visit)</span>
         </div>
       </div>
 
-      {/* Attendance History Table */}
-      <div className="glass-panel rounded-2xl p-5 sm:p-6 border border-[var(--border)]">
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-4 pb-3 border-b border-[var(--border)]">
-          <h3 className="text-sm font-bold text-[var(--foreground)]">Attendance Logbook</h3>
+      {/* Log Table */}
+      <div className="glass-panel rounded-3xl p-6 border border-slate-200 shadow-sm overflow-x-auto">
+        <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2 mb-4 pb-3 border-b border-slate-100">
+          <Clock className="w-4 h-4 text-cyan-600" /> Shift History & Details
+        </h3>
 
-          {/* Filter Chips */}
-          <div className="flex items-center gap-1.5 text-xs">
-            <span className="text-slate-500 text-[11px] mr-1 flex items-center gap-1">
-              <Filter className="w-3 h-3" /> Status:
-            </span>
-            {["ALL", "PRESENT", "HALF_DAY", "ON_LEAVE"].map((st) => (
-              <button
-                key={st}
-                onClick={() => setStatusFilter(st)}
-                className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all ${
-                  statusFilter === st
-                    ? "bg-cyan-500 text-slate-950 font-bold"
-                    : "bg-slate-800 text-slate-400 hover:text-slate-200"
-                }`}
-              >
-                {st}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead>
-              <tr className="border-b border-[var(--border)] text-slate-400">
-                <th className="pb-2.5 font-semibold">Work Date</th>
-                <th className="pb-2.5 font-semibold">Check-In</th>
-                <th className="pb-2.5 font-semibold">Check-Out</th>
-                <th className="pb-2.5 font-semibold">Logged Hours</th>
-                <th className="pb-2.5 font-semibold">Status</th>
-                <th className="pb-2.5 font-semibold">Remarks</th>
+        <table className="w-full text-left text-xs">
+          <thead>
+            <tr className="border-b border-slate-100 text-slate-400">
+              <th className="pb-3 font-semibold">Work Date</th>
+              <th className="pb-3 font-semibold">Check-In</th>
+              <th className="pb-3 font-semibold">Check-Out</th>
+              <th className="pb-3 font-semibold">Logged Duration</th>
+              <th className="pb-3 font-semibold">Notes / Shift</th>
+              <th className="pb-3 font-semibold text-right">Status</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100">
+            {filteredLogs.map((item) => (
+              <tr key={item.id} className="hover:bg-slate-50 transition-colors">
+                <td className="py-3.5 font-bold text-slate-800">{formatDate(item.workDate)}</td>
+                <td className="py-3.5 font-mono text-slate-600">{formatTime(item.checkIn)}</td>
+                <td className="py-3.5 font-mono text-slate-600">
+                  {item.checkOut ? formatTime(item.checkOut) : "Active / Live"}
+                </td>
+                <td className="py-3.5 font-mono font-bold text-cyan-700">{item.totalHours.toFixed(2)} hrs</td>
+                <td className="py-3.5 text-slate-500 italic">{item.notes || "Standard shift"}</td>
+                <td className="py-3.5 text-right">
+                  <span
+                    className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                      item.status === "PRESENT"
+                        ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                        : item.status === "HALF_DAY"
+                        ? "bg-amber-50 text-amber-700 border border-amber-200"
+                        : "bg-purple-50 text-purple-700 border border-purple-200"
+                    }`}
+                  >
+                    {item.status}
+                  </span>
+                </td>
               </tr>
-            </thead>
-            <tbody className="divide-y divide-[var(--border)]">
-              {filtered.map((rec) => (
-                <tr key={rec.id} className="hover:bg-slate-800/20 transition-colors">
-                  <td className="py-3.5 font-semibold text-slate-200">{formatDate(rec.workDate)}</td>
-                  <td className="py-3.5 text-slate-300 font-mono">{formatTime(rec.checkIn)}</td>
-                  <td className="py-3.5 text-slate-300 font-mono">
-                    {rec.checkOut ? formatTime(rec.checkOut) : "Active / Live"}
-                  </td>
-                  <td className="py-3.5 font-mono font-bold text-cyan-400">
-                    {rec.totalHours ? `${rec.totalHours} hrs` : "--"}
-                  </td>
-                  <td className="py-3.5">
-                    <span
-                      className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${
-                        rec.status === "PRESENT"
-                          ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                          : rec.status === "HALF_DAY"
-                          ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
-                          : "bg-rose-500/10 text-rose-400 border border-rose-500/20"
-                      }`}
-                    >
-                      {rec.status}
-                    </span>
-                  </td>
-                  <td className="py-3.5 text-slate-400 italic">{rec.notes || "Standard shift"}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );

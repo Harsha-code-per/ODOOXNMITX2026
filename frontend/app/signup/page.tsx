@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { PersonaDemoBar } from "@/components/shared/PersonaDemoBar";
-import { User, Mail, Lock, Building2, Briefcase, ArrowRight, CheckCircle2 } from "lucide-react";
+import { User, Mail, Lock, Building2, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 
 export default function SignupPage() {
@@ -35,129 +35,147 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] flex flex-col justify-between relative overflow-hidden">
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col justify-between relative overflow-hidden font-sans">
       <PersonaDemoBar />
 
-      <main className="flex-1 flex items-center justify-center p-4 z-10 my-6">
-        <div className="w-full max-w-lg glass-panel rounded-3xl border border-cyan-500/30 shadow-2xl p-6 sm:p-8 relative">
+      <main className="flex-1 flex items-center justify-center p-4 z-10 my-8">
+        <div className="w-full max-w-lg glass-panel rounded-3xl border border-slate-200 shadow-2xl p-6 sm:p-8 relative">
           <div className="flex flex-col items-center text-center mb-6">
-            <div className="w-14 h-14 rounded-2xl p-1.5 bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center shadow-xl shadow-cyan-500/25 mb-2 overflow-hidden">
+            <div className="w-14 h-14 rounded-2xl p-1 bg-white border border-cyan-300 shadow-md flex items-center justify-center mb-2 overflow-hidden">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/logo.png" alt="Dayflow Logo" className="w-full h-full object-contain" />
             </div>
-            <h1 className="text-2xl font-bold font-heading">Register New Employee</h1>
-            <p className="text-xs text-slate-400">Join your team on Dayflow HRMS</p>
+            <h1 className="text-2xl font-bold font-heading text-slate-900">Register New Employee</h1>
+            <p className="text-xs text-slate-500">Join your team on Dayflow HRMS</p>
           </div>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-3.5 text-xs">
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">First Name</label>
+                <label className="block text-slate-700 font-semibold mb-1">First Name</label>
                 <input
                   type="text"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
                   placeholder="e.g. Marcus"
-                  className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-[var(--border)] text-slate-100 focus:border-cyan-400"
                   required
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 text-xs"
                 />
               </div>
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">Last Name</label>
+                <label className="block text-slate-700 font-semibold mb-1">Last Name</label>
                 <input
                   type="text"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
-                  placeholder="e.g. Brody"
-                  className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-[var(--border)] text-slate-100 focus:border-cyan-400"
+                  placeholder="e.g. Vance"
                   required
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 text-xs"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">Employee ID</label>
+                <label className="block text-slate-700 font-semibold mb-1">Employee ID</label>
                 <input
                   type="text"
                   value={empId}
                   onChange={(e) => setEmpId(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-[var(--border)] text-slate-100 font-mono focus:border-cyan-400"
-                  required
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-100 border border-slate-200 text-slate-800 font-mono font-bold text-xs"
                 />
               </div>
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">Department</label>
+                <label className="block text-slate-700 font-semibold mb-1">Department</label>
                 <select
                   value={department}
                   onChange={(e) => setDepartment(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-[var(--border)] text-slate-100 focus:border-cyan-400"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:border-cyan-500 text-xs font-semibold"
                 >
                   <option value="Engineering">Engineering</option>
                   <option value="Product">Product</option>
                   <option value="Human Resources">Human Resources</option>
                   <option value="Sales">Sales</option>
-                  <option value="Marketing">Marketing</option>
                   <option value="Finance">Finance</option>
+                  <option value="Marketing">Marketing</option>
                 </select>
               </div>
             </div>
 
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Work Email</label>
+              <label className="block text-slate-700 font-semibold mb-1">Work Email</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="marcus.brody@dayflow.io"
-                className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-[var(--border)] text-slate-100 focus:border-cyan-400"
+                placeholder="marcus.vance@dayflow.io"
                 required
+                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 text-xs"
               />
             </div>
 
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Password</label>
+              <label className="block text-slate-700 font-semibold mb-1">Create Password</label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••••••"
-                className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-[var(--border)] text-slate-100 font-mono focus:border-cyan-400"
                 required
+                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 text-xs font-mono"
               />
             </div>
 
             <div>
-              <label className="block text-slate-300 font-semibold mb-1">Account Role</label>
-              <select
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-[var(--border)] text-slate-100 focus:border-cyan-400"
-              >
-                <option value="EMPLOYEE">Employee (Standard Access)</option>
-                <option value="HR">HR Officer (Approvals & Payroll Control)</option>
-              </select>
+              <label className="block text-slate-700 font-semibold mb-1">Role Type</label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setRole("EMPLOYEE")}
+                  className={`py-2 rounded-xl text-xs font-bold border transition-all ${
+                    role === "EMPLOYEE"
+                      ? "bg-cyan-50 border-cyan-400 text-cyan-800 shadow-xs"
+                      : "bg-slate-50 border-slate-200 text-slate-600"
+                  }`}
+                >
+                  Employee
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRole("HR")}
+                  className={`py-2 rounded-xl text-xs font-bold border transition-all ${
+                    role === "HR"
+                      ? "bg-cyan-50 border-cyan-400 text-cyan-800 shadow-xs"
+                      : "bg-slate-50 border-slate-200 text-slate-600"
+                  }`}
+                >
+                  HR Officer
+                </button>
+              </div>
             </div>
 
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full mt-3 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold text-xs sm:text-sm shadow-lg shadow-cyan-500/25 transition-all disabled:opacity-50"
+              className="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-xs shadow-md shadow-cyan-500/25 transition-all hover:scale-[1.02] active:scale-[0.98] mt-3 flex items-center justify-center gap-1.5"
             >
-              <span>{isLoading ? "Registering..." : "Create Dayflow Account"}</span>
+              <span>{isLoading ? "Creating..." : "Complete Registration"}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>
 
-          <div className="mt-5 text-center text-xs text-slate-400">
-            Already have an account?{" "}
-            <Link href="/login" className="text-cyan-400 font-bold hover:underline">
-              Sign In
+          <div className="mt-5 pt-3 border-t border-slate-100 text-center text-xs text-slate-500">
+            Already registered?{" "}
+            <Link href="/login" className="text-cyan-700 hover:underline font-bold">
+              Sign In here
             </Link>
           </div>
         </div>
       </main>
 
-      <footer className="py-3 text-center text-xs text-slate-500">Dayflow HRMS · Registration</footer>
+      <footer className="w-full text-center py-4 text-xs text-slate-400 z-10">
+        Dayflow HRMS • Odoo × NMIT Hackathon 2026
+      </footer>
     </div>
   );
 }

@@ -15,9 +15,13 @@ export interface SalaryComponents {
 
 export interface PayableSalaryResult {
   totalWorkingDays: number;
+  totalWorkDays: number;
   payableDays: number;
+  presentDays: number;
+  approvedLeaves: number;
   unpaidDays: number;
   effectiveNetPayout: number;
+  payableAmount: number;
 }
 
 /**
@@ -76,8 +80,8 @@ export function calculateSalaryStructure(wageInput: number | string): SalaryComp
 export function calculatePayablePayout(
   netSalary: number,
   totalWorkingDays: number = 22,
-  presentDays: number = 20,
-  paidLeaves: number = 2
+  presentDays: number = 21,
+  paidLeaves: number = 1
 ): PayableSalaryResult {
   const payableDays = Math.min(totalWorkingDays, presentDays + paidLeaves);
   const unpaidDays = Math.max(0, totalWorkingDays - payableDays);
@@ -86,8 +90,12 @@ export function calculatePayablePayout(
 
   return {
     totalWorkingDays,
+    totalWorkDays: totalWorkingDays,
     payableDays,
+    presentDays,
+    approvedLeaves: paidLeaves,
     unpaidDays,
     effectiveNetPayout,
+    payableAmount: effectiveNetPayout,
   };
 }

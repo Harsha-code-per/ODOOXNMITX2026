@@ -47,28 +47,24 @@ export default function AdminEmployeesPage() {
   const departments = ["ALL", "Engineering", "Product", "Human Resources", "Sales", "Marketing", "Finance"];
 
   const filtered = employees.filter((emp) => {
-    const matchesDept = selectedDept === "ALL" || emp.department === selectedDept;
-    const q = searchQuery.toLowerCase();
     const matchesSearch =
-      emp.firstName.toLowerCase().includes(q) ||
-      emp.lastName.toLowerCase().includes(q) ||
-      emp.employeeId.toLowerCase().includes(q) ||
-      emp.designation.toLowerCase().includes(q) ||
-      emp.email.toLowerCase().includes(q);
-    return matchesDept && matchesSearch;
+      `${emp.firstName} ${emp.lastName}`.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      emp.employeeId.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      emp.designation.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      emp.email.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const matchesDept = selectedDept === "ALL" || emp.department === selectedDept;
+    return matchesSearch && matchesDept;
   });
 
   const handleInspectAs = (emp: Employee) => {
     if (emp.employeeId === "EMP-003") {
       switchPersona("alex");
-    } else if (emp.employeeId === "EMP-002") {
-      switchPersona("sarah");
-    } else if (emp.employeeId === "EMP-001") {
-      switchPersona("admin");
+      router.push("/dashboard/employee");
     } else {
-      toast.info(`Viewing as ${emp.firstName} ${emp.lastName}`);
+      toast.info(`Switched context to ${emp.firstName} ${emp.lastName}`);
+      router.push("/dashboard/employee");
     }
-    router.push("/dashboard/employee");
   };
 
   return (
@@ -76,18 +72,18 @@ export default function AdminEmployeesPage() {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold font-heading">Employee Directory</h1>
-          <p className="text-xs text-slate-400">
-            Manage organization records, inspect profiles, and govern compensation.
+          <h1 className="text-xl sm:text-2xl font-bold font-heading text-slate-900">Employee Directory</h1>
+          <p className="text-xs text-slate-500">
+            Browse staff roster, inspect employee portals, and manage compensation profiles.
           </p>
         </div>
 
-        {/* View Mode Toggle */}
-        <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-900 border border-[var(--border)]">
+        {/* View mode toggle */}
+        <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-white border border-slate-200 shadow-xs">
           <button
             onClick={() => setViewMode("grid")}
-            className={`p-1.5 rounded-lg text-xs transition-colors ${
-              viewMode === "grid" ? "bg-cyan-500 text-slate-950 font-bold" : "text-slate-400 hover:text-slate-200"
+            className={`p-2 rounded-xl transition-all ${
+              viewMode === "grid" ? "bg-cyan-600 text-white shadow-xs" : "text-slate-500 hover:text-slate-900"
             }`}
             title="Grid View"
           >
@@ -95,8 +91,8 @@ export default function AdminEmployeesPage() {
           </button>
           <button
             onClick={() => setViewMode("table")}
-            className={`p-1.5 rounded-lg text-xs transition-colors ${
-              viewMode === "table" ? "bg-cyan-500 text-slate-950 font-bold" : "text-slate-400 hover:text-slate-200"
+            className={`p-2 rounded-xl transition-all ${
+              viewMode === "table" ? "bg-cyan-600 text-white shadow-xs" : "text-slate-500 hover:text-slate-900"
             }`}
             title="Table View"
           >
@@ -105,17 +101,16 @@ export default function AdminEmployeesPage() {
         </div>
       </div>
 
-      {/* Filter & Search Bar */}
-      <div className="glass-panel rounded-2xl p-4 border border-[var(--border)] flex flex-wrap items-center justify-between gap-3 text-xs">
-        {/* Search */}
+      {/* Search & Department Filters */}
+      <div className="flex flex-wrap items-center justify-between gap-3 p-4 rounded-3xl glass-panel border border-slate-200 shadow-xs">
         <div className="relative flex-1 min-w-[240px]">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search by name, ID, designation, or email..."
-            className="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-900/90 border border-[var(--border)] text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-cyan-400 text-xs"
+            className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 text-xs"
           />
         </div>
 
@@ -125,10 +120,10 @@ export default function AdminEmployeesPage() {
             <button
               key={dept}
               onClick={() => setSelectedDept(dept)}
-              className={`px-3 py-1.5 rounded-lg font-semibold transition-all ${
+              className={`px-3 py-1.5 rounded-xl font-bold text-xs transition-all ${
                 selectedDept === dept
-                  ? "bg-cyan-500 text-slate-950 font-bold shadow-sm"
-                  : "bg-slate-800 text-slate-400 hover:text-slate-200"
+                  ? "bg-cyan-600 text-white shadow-xs"
+                  : "bg-slate-100 text-slate-600 hover:text-slate-900 hover:bg-slate-200"
               }`}
             >
               {dept}
@@ -143,11 +138,11 @@ export default function AdminEmployeesPage() {
           {filtered.map((emp) => (
             <div
               key={emp.id}
-              className="glass-card rounded-2xl p-5 border border-[var(--border)] flex flex-col justify-between hover:border-cyan-500/40 transition-all group"
+              className="glass-card rounded-3xl p-6 border border-slate-200 shadow-sm flex flex-col justify-between hover:border-cyan-400 transition-all group"
             >
               <div>
                 {/* Avatar & Badges */}
-                <div className="flex items-start justify-between gap-3 mb-3">
+                <div className="flex items-start justify-between gap-3 mb-4">
                   <div className="flex items-center gap-3">
                     <AvatarBadge
                       name={`${emp.firstName} ${emp.lastName}`}
@@ -157,21 +152,21 @@ export default function AdminEmployeesPage() {
                       showStatus
                     />
                     <div>
-                      <h3 className="font-bold text-sm text-[var(--foreground)] leading-tight">
+                      <h3 className="font-bold text-sm text-slate-900 leading-tight">
                         {emp.firstName} {emp.lastName}
                       </h3>
-                      <span className="text-[11px] text-cyan-400 font-medium">{emp.designation}</span>
-                      <p className="text-[10px] text-slate-500 font-mono mt-0.5">{emp.employeeId}</p>
+                      <span className="text-[11px] text-cyan-800 font-semibold">{emp.designation}</span>
+                      <p className="text-[10px] text-slate-400 font-mono mt-0.5">{emp.employeeId}</p>
                     </div>
                   </div>
 
                   <span
-                    className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
                       emp.status === "ACTIVE"
-                        ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                        ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
                         : emp.status === "ON_LEAVE"
-                        ? "bg-purple-500/10 text-purple-400 border border-purple-500/20"
-                        : "bg-rose-500/10 text-rose-400"
+                        ? "bg-purple-50 text-purple-700 border border-purple-200"
+                        : "bg-rose-50 text-rose-700 border border-rose-200"
                     }`}
                   >
                     {emp.status}
@@ -179,43 +174,43 @@ export default function AdminEmployeesPage() {
                 </div>
 
                 {/* Details */}
-                <div className="p-3 rounded-xl bg-slate-900/60 border border-[var(--border)] flex flex-col gap-1.5 text-xs text-slate-300 mb-4">
+                <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 flex flex-col gap-1.5 text-xs text-slate-600 mb-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-500">Department:</span>
-                    <span className="font-semibold text-slate-200">{emp.department}</span>
+                    <span className="text-slate-400">Department:</span>
+                    <span className="font-semibold text-slate-800">{emp.department}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-500">Base Wage (CTC):</span>
-                    <span className="font-mono font-bold text-cyan-300">{formatCurrency(emp.wage)}</span>
+                    <span className="text-slate-400">Base Wage (CTC):</span>
+                    <span className="font-mono font-bold text-cyan-700">{formatCurrency(emp.wage)}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-500">Joined:</span>
-                    <span className="text-slate-300">{formatDate(emp.joiningDate)}</span>
+                    <span className="text-slate-400">Joined:</span>
+                    <span className="text-slate-700">{formatDate(emp.joiningDate)}</span>
                   </div>
                 </div>
               </div>
 
               {/* Action Buttons */}
-              <div className="grid grid-cols-3 gap-1.5 pt-2 border-t border-[var(--border)] text-[11px]">
+              <div className="grid grid-cols-3 gap-2 pt-3 border-t border-slate-100 text-[11px]">
                 <button
                   onClick={() => handleInspectAs(emp)}
-                  className="flex items-center justify-center gap-1 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition-colors"
+                  className="flex items-center justify-center gap-1 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition-colors"
                   title="View Portal as this employee"
                 >
-                  <Eye className="w-3.5 h-3.5 text-cyan-400" />
+                  <Eye className="w-3.5 h-3.5 text-cyan-600" />
                   <span>Inspect</span>
                 </button>
                 <button
                   onClick={() => setSelectedEmployeeForEdit(emp)}
-                  className="flex items-center justify-center gap-1 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition-colors"
+                  className="flex items-center justify-center gap-1 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition-colors"
                   title="Edit employee records"
                 >
-                  <Edit3 className="w-3.5 h-3.5 text-cyan-400" />
+                  <Edit3 className="w-3.5 h-3.5 text-cyan-600" />
                   <span>Edit</span>
                 </button>
                 <button
                   onClick={() => setSelectedEmployeeForSalary(emp)}
-                  className="flex items-center justify-center gap-1 py-1.5 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 font-bold border border-cyan-500/30 transition-colors"
+                  className="flex items-center justify-center gap-1 py-2 rounded-xl bg-cyan-50 hover:bg-cyan-100 text-cyan-800 font-bold border border-cyan-200 transition-colors"
                   title="Adjust wage & recalculate"
                 >
                   <DollarSign className="w-3.5 h-3.5" />
@@ -227,10 +222,10 @@ export default function AdminEmployeesPage() {
         </div>
       ) : (
         /* Table View */
-        <div className="glass-panel rounded-2xl p-5 border border-[var(--border)] overflow-x-auto">
+        <div className="glass-panel rounded-3xl p-6 border border-slate-200 shadow-sm overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>
-              <tr className="border-b border-[var(--border)] text-slate-400">
+              <tr className="border-b border-slate-100 text-slate-400">
                 <th className="pb-3 font-semibold">Employee</th>
                 <th className="pb-3 font-semibold">ID</th>
                 <th className="pb-3 font-semibold">Department</th>
@@ -240,10 +235,10 @@ export default function AdminEmployeesPage() {
                 <th className="pb-3 font-semibold text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[var(--border)]">
+            <tbody className="divide-y divide-slate-100">
               {filtered.map((emp) => (
-                <tr key={emp.id} className="hover:bg-slate-800/20 transition-colors">
-                  <td className="py-3 flex items-center gap-2.5">
+                <tr key={emp.id} className="hover:bg-slate-50 transition-colors">
+                  <td className="py-3.5 flex items-center gap-2.5">
                     <AvatarBadge
                       name={`${emp.firstName} ${emp.lastName}`}
                       department={emp.department}
@@ -252,51 +247,42 @@ export default function AdminEmployeesPage() {
                       showStatus
                     />
                     <div>
-                      <span className="font-bold text-slate-200 block">
+                      <span className="font-bold text-slate-800 block">
                         {emp.firstName} {emp.lastName}
                       </span>
-                      <span className="text-[10px] text-slate-500">{emp.email}</span>
+                      <span className="text-[10px] text-slate-400">{emp.email}</span>
                     </div>
                   </td>
-                  <td className="py-3 font-mono text-slate-400">{emp.employeeId}</td>
-                  <td className="py-3 text-slate-300 font-semibold">{emp.department}</td>
-                  <td className="py-3 text-slate-400">{emp.designation}</td>
-                  <td className="py-3 font-mono font-bold text-cyan-300">{formatCurrency(emp.wage)}</td>
-                  <td className="py-3">
+                  <td className="py-3.5 font-mono text-slate-500">{emp.employeeId}</td>
+                  <td className="py-3.5 text-slate-700 font-semibold">{emp.department}</td>
+                  <td className="py-3.5 text-slate-600">{emp.designation}</td>
+                  <td className="py-3.5 font-mono font-bold text-cyan-700">{formatCurrency(emp.wage)}</td>
+                  <td className="py-3.5">
                     <span
-                      className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
+                      className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
                         emp.status === "ACTIVE"
-                          ? "bg-emerald-500/10 text-emerald-400"
+                          ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
                           : emp.status === "ON_LEAVE"
-                          ? "bg-purple-500/10 text-purple-400"
-                          : "bg-rose-500/10 text-rose-400"
+                          ? "bg-purple-50 text-purple-700 border border-purple-200"
+                          : "bg-rose-50 text-rose-700 border border-rose-200"
                       }`}
                     >
                       {emp.status}
                     </span>
                   </td>
-                  <td className="py-3 text-right">
+                  <td className="py-3.5 text-right">
                     <div className="inline-flex items-center gap-1.5">
                       <button
                         onClick={() => handleInspectAs(emp)}
-                        className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300"
-                        title="Inspect as Employee"
+                        className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-[11px]"
                       >
-                        <Eye className="w-3.5 h-3.5 text-cyan-400" />
-                      </button>
-                      <button
-                        onClick={() => setSelectedEmployeeForEdit(emp)}
-                        className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300"
-                        title="Edit Profile"
-                      >
-                        <Edit3 className="w-3.5 h-3.5 text-cyan-400" />
+                        Inspect
                       </button>
                       <button
                         onClick={() => setSelectedEmployeeForSalary(emp)}
-                        className="p-1.5 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400"
-                        title="Adjust Wage"
+                        className="px-2.5 py-1 rounded-lg bg-cyan-50 hover:bg-cyan-100 text-cyan-800 font-bold text-[11px] border border-cyan-200"
                       >
-                        <DollarSign className="w-3.5 h-3.5" />
+                        Wage
                       </button>
                     </div>
                   </td>
