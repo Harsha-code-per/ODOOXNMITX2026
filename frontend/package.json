@@ -44,12 +44,5 @@
     "tailwindcss": "^4",
     "typescript": "^5"
   },
-  "packageManager": "pnpm@11.3.0",
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "core-js",
-      "esbuild",
-      "@swc/core"
-    ]
-  }
+  "packageManager": "pnpm@11.3.0"
 }
