@@ -1,135 +1,330 @@
-# Dayflow HRMS — FastAPI Backend
+<div align="center">
 
-Enterprise-grade Human Resource Management System (HRMS) backend built with **FastAPI**, **SQLAlchemy 2.0 (Async)**, **PostgreSQL (Supabase)**, **Pydantic v2**, and **PyJWT / bcrypt**.
+# ⚡ Dayflow HRMS — FastAPI Async Backend
+### *Enterprise Multi-Tenant REST API & Statutory Payroll Governance Engine*
+
+[![Live on Render](https://img.shields.io/badge/Render-Live_API-46E3B7.svg?style=for-the-badge&logo=render&logoColor=white)](https://dayflow-api-mnu8.onrender.com/docs)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688.svg?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![SQLAlchemy 2.0](https://img.shields.io/badge/SQLAlchemy-2.0_Async-red.svg?style=for-the-badge&logo=sqlalchemy&logoColor=white)](https://docs.sqlalchemy.org)
+[![PostgreSQL 16](https://img.shields.io/badge/PostgreSQL-16_Asyncpg-336791.svg?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org)
+[![Alembic](https://img.shields.io/badge/Alembic-Schema_Migrations-purple.svg?style=for-the-badge)](https://alembic.sqlalchemy.org)
+[![Pydantic v2](https://img.shields.io/badge/Pydantic-v2.13-E92063.svg?style=for-the-badge&logo=pydantic&logoColor=white)](https://docs.pydantic.dev)
+[![Pytest](https://img.shields.io/badge/Pytest-35%2F35_Passing-brightgreen.svg?style=for-the-badge&logo=pytest&logoColor=white)](tests/)
+
+<br/>
+
+**Architecture**: Multi-Tenant SaaS Async Engine with Row-Level Isolation  
+**Database**: PostgreSQL 16 on Render (`dayflow_whry`) / SQLite local fallback  
+**Production URL**: [https://dayflow-api-mnu8.onrender.com](https://dayflow-api-mnu8.onrender.com)  
+**Swagger API Docs**: [https://dayflow-api-mnu8.onrender.com/docs](https://dayflow-api-mnu8.onrender.com/docs)
+
+</div>
 
 ---
 
-## 🌟 Key Features
+## 📑 Table of Contents
 
-1. **Dynamic Salary Engine (`app/services/payroll_service.py`)**:
-   - Automatically recalculates **Basic (50%)**, **HRA (50% of Basic)**, **Standard Allowance (₹4,167)**, **Performance Bonus (8.33%)**, **LTA (8.33%)**, **Fixed Allowance (balancing component)**, **PF (12%)**, and **PT (₹200)** whenever base wage is updated.
-   - Computes payable days and effective net payouts based on actual attendance and approved paid/unpaid leaves.
-2. **Attendance State Machine**:
-   - Duplicate check-in prevention (`400 Bad Request`).
-   - Clock-out duration calculator (`total_hours`, `HALF_DAY` vs `PRESENT`).
-3. **Leave Workflow & Attendance Sync**:
-   - Quota tracking (`PAID: 18`, `SICK: 10`, `CASUAL: 6`, `UNPAID: 0`).
-   - 1-Click HR Approval/Rejection queue.
-   - Automatically updates employee status to `ON_LEAVE` and populates attendance records for approved leave dates.
-4. **Live Executive Analytics**:
-   - Real-time PostgreSQL database aggregations for total headcount, presence %, department payroll totals, and 5-day attendance trends.
-5. **Role-Based Access Control (RBAC)**:
-   - PyJWT + bcrypt authentication guarding `ADMIN`, `HR`, and `EMPLOYEE` permissions.
+- [🌟 Architectural Overview](#-architectural-overview)
+- [🏛️ Multi-Tenant Relational Data Model](#️-multi-tenant-relational-data-model)
+- [⚙️ Core Backend Services](#️-core-backend-services)
+- [📊 Dynamic Statutory Payroll Formula](#-dynamic-statutory-payroll-formula)
+- [🔐 Zero-Trust Security & RBAC](#-zero-trust-security--rbac)
+- [🧪 Automated Test Suite & E2E Verification](#-automated-test-suite--e2e-verification)
+- [🚀 Quickstart & Local Setup](#-quickstart--local-setup)
+- [🗄️ Alembic Database Migration Guide](#️-alembic-database-migration-guide)
+- [🐳 Production Docker & Render Deployment](#-production-docker--render-deployment)
+- [📡 Complete API Route Specification](#-complete-api-route-specification)
 
 ---
 
-## 🚀 Quickstart Guide
+## 🌟 Architectural Overview
 
-### 1. Prerequisites
-- Python 3.12+ (or 3.14+)
-- [`uv`](https://github.com/astral-sh/uv) package manager
+The **Dayflow Backend** is an asynchronous, high-throughput REST API engineered with **FastAPI**, **SQLAlchemy 2.0 (Async)**, **asyncpg**, **Pydantic v2**, and **PyJWT**.
 
-### 2. Setup & Install
+Key architectural guarantees:
+1. **Multi-Tenant Row-Level Isolation**: Every query across employees, attendance, leaves, and payroll is scoped by `company_id`.
+2. **Dynamic Statutory Payroll**: Updating an employee's base CTC instantly cascades across Basic (50%), HRA, Allowances, PF (12%), PT (₹200), and Net Take-Home pay.
+3. **Attendance State Machine**: Clock-in duplicate prevention, auto-computation of duration hours, and auto-marking half-day vs full-day presence.
+4. **Automated Leave Governance**: 1-click approvals that update leave status and synchronize attendance records.
+5. **Platform Super Admin Plane**: Multi-tenant workspace provisioning, client inquiry queue, and temporary access key generation.
+
+---
+
+## 🏛️ Multi-Tenant Relational Data Model
+
+```mermaid
+erDiagram
+    COMPANIES ||--o{ PROFILES : "has users"
+    COMPANIES ||--o{ EMPLOYEES : "employs"
+    COMPANIES ||--o{ ATTENDANCE : "logs"
+    COMPANIES ||--o{ LEAVE_REQUESTS : "governs"
+    COMPANIES ||--o{ SALARY_STRUCTURES : "funds"
+    PROFILES ||--o| EMPLOYEES : "identifies"
+    EMPLOYEES ||--o{ ATTENDANCE : "records"
+    EMPLOYEES ||--o{ LEAVE_REQUESTS : "submits"
+    EMPLOYEES ||--o| SALARY_STRUCTURES : "assigned"
+
+    COMPANIES {
+        uuid id PK
+        string name
+        string slug
+        string domain
+        string plan
+        string status
+        datetime created_at
+    }
+
+    PROFILES {
+        uuid id PK
+        uuid company_id FK
+        string email UK
+        string password_hash
+        string role
+        boolean is_active
+        boolean must_reset_password
+    }
+
+    EMPLOYEES {
+        uuid id PK
+        uuid company_id FK
+        uuid profile_id FK
+        string employee_id UK
+        string first_name
+        string last_name
+        string department
+        string designation
+        float wage
+    }
+
+    ATTENDANCE {
+        uuid id PK
+        uuid company_id FK
+        uuid employee_id FK
+        date date
+        datetime check_in
+        datetime check_out
+        float total_hours
+        string status
+    }
+
+    LEAVE_REQUESTS {
+        uuid id PK
+        uuid company_id FK
+        uuid employee_id FK
+        string leave_type
+        date start_date
+        date end_date
+        string status
+        string reason
+    }
+
+    SALARY_STRUCTURES {
+        uuid id PK
+        uuid company_id FK
+        uuid employee_id FK
+        float wage
+        float basic
+        float hra
+        float pf_deduction
+        float professional_tax
+        float net_salary
+    }
+```
+
+---
+
+## ⚙️ Core Backend Services
+
+### 1. Dynamic Payroll Service ([`app/services/payroll_service.py`](app/services/payroll_service.py))
+- Computes complete statutory breakdown given base annual or monthly CTC.
+- Itemizes Basic (50%), HRA (25%), Standard Allowance (up to ₹4,166.67), Performance Bonus (8.33%), LTA (8.33%), Fixed Allowance (balancing sum), Provident Fund (12% of Basic), and Professional Tax (₹200).
+- Calculates attendance-adjusted payout based on working days vs unpaid absences.
+
+### 2. Email Delivery Service ([`app/services/email_service.py`](app/services/email_service.py))
+- Integrates with **Resend API** for transactional email delivery.
+- Dispatches tenant activation links, temporary password notices, and leave approval notifications.
+- Automatic secret masking and resilient offline fallback logging when API keys are unconfigured.
+
+### 3. Startup Auto-Seeder ([`app/main.py`](app/main.py) & [`app/seed.py`](app/seed.py))
+- Executed on container startup to automatically initialize tables and seed 11 complete demo personas if the database is empty.
+
+---
+
+## 📊 Dynamic Statutory Payroll Formula
+
+$$\text{Gross Wage (CTC)} = \text{Basic} + \text{HRA} + \text{Standard} + \text{Bonus} + \text{LTA} + \text{Fixed Allowance}$$
+
+$$\text{Basic Salary} = 50\% \times \text{CTC}$$
+
+$$\text{HRA} = 50\% \times \text{Basic} = 25\% \times \text{CTC}$$
+
+$$\text{Standard Allowance} = \min(₹4,166.67, \text{CTC} - \text{Basic} - \text{HRA})$$
+
+$$\text{Provident Fund (PF)} = 12\% \times \text{Basic}$$
+
+$$\text{Professional Tax (PT)} = ₹200.00/\text{month}$$
+
+$$\text{Net Take-Home Pay} = \text{Gross Wage} - \text{PF} - \text{PT}$$
+
+---
+
+## 🔐 Zero-Trust Security & RBAC
+
+- **Password Hashing**: Industry-standard `bcrypt` with automatic salt generation.
+- **JWT Issuance**: Signed with `HS256`, containing `sub` (user profile ID), `role` (`SUPER_ADMIN`, `ADMIN`, `HR`, `EMPLOYEE`), and `company_id`.
+- **First-Login Gate**: Users created by provisioning or onboarding are tagged with `must_reset_password: true`. FastAPI middleware blocks access to core APIs until `POST /api/v1/auth/change-password` is executed.
+- **Role Enforcement**: Negative RBAC checks prevent privilege escalation (e.g. HR cannot create ADMIN accounts; employees cannot view company-wide attendance).
+
+---
+
+## 🧪 Automated Test Suite & E2E Verification
+
+### 1. Pytest Test Suite (35/35 Green)
 ```bash
+# Run unit & integration tests
+uv run pytest
+```
+Covers:
+- `test_api_endpoints.py` — Authentication, attendance punch, leave requests, employee directory.
+- `test_dynamic_payroll.py` — Indian statutory CTC recalculation at 50k, 60k, 75k, 90k, 150k wages.
+- `test_email_service.py` — Resend API integration, secret sanitization, and fallback delivery.
+- `test_tenant_isolation.py` — Multi-tenant query boundary enforcement.
+- `test_super_admin.py` — Tenant provisioning, inquiry handling, and status toggles.
+
+### 2. 7-Stage Real-Data SaaS Lifecycle Script
+```bash
+# Run the complete real-data E2E verification
+uv run python scripts/e2e_real_data_flow.py
+```
+Executes all 7 stages against live database tables:
+1. Lead Submission (`POST /inquiries`)
+2. Super Admin Provisioning (`POST /super-admin/companies`)
+3. Founder 1st-Login Password Reset (`POST /auth/change-password`)
+4. Staff Onboarding & Wage Setup (`POST /auth/register`)
+5. Biometric Clock-In/Out (`POST /attendance/check-in`)
+6. Leave Application & Kanban Approval (`PATCH /leaves/{id}/approve`)
+7. Executive Intelligence Telemetry (`GET /analytics/dashboard`)
+
+---
+
+## 🚀 Quickstart & Local Setup
+
+```bash
+# 1. Navigate to backend directory
 cd backend
+
+# 2. Install dependencies with uv
 uv sync
-```
 
-### 3. Environment Variables
-Copy `.env.example` to `.env`:
-```bash
+# 3. Copy environment configuration
 cp .env.example .env
-```
-Default `.env` configuration:
-```env
-DATABASE_URL=sqlite+aiosqlite:///./dayflow.db
-# For Supabase PostgreSQL:
-# DATABASE_URL=postgresql+asyncpg://postgres:YOUR_PASSWORD@db.YOUR_SUPABASE_REF.supabase.co:5432/postgres
-JWT_SECRET_KEY=dayflow_super_secret_jwt_key_2026_hackathon
-JWT_ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=1440
-CORS_ORIGINS=["http://localhost:3000","http://localhost:3001","https://dayflow-frontend.vercel.app","*"]
-ENVIRONMENT=development
-```
 
-### 4. Database Migrations (Alembic)
-
-Run existing migrations to upgrade the schema to the latest version:
-```bash
+# 4. Run database migrations
 uv run alembic upgrade head
-```
 
-#### Inspect Current Revision:
-```bash
-uv run alembic current
-```
-
-#### View Available Revision Heads:
-```bash
-uv run alembic heads
-```
-
-#### Create a New Migration:
-```bash
-uv run alembic revision -m "description_of_migration"
-# Or autogenerate based on SQLAlchemy models:
-uv run alembic revision --autogenerate -m "description_of_migration"
-```
-
-#### Roll Back / Downgrade:
-```bash
-# Roll back by 1 revision
-uv run alembic downgrade -1
-
-# Roll back to initial base schema
-uv run alembic downgrade base
-```
-
-### 5. Database Seeding (11 Demo Personas)
-```bash
+# 5. Seed database with demo personas
 uv run python -m app.seed
-```
 
-### 6. Run the Server
-```bash
+# 6. Start development server
 uv run uvicorn app.main:app --reload --port 8000
 ```
-- Interactive Swagger UI: `http://localhost:8000/docs`
-- ReDoc Documentation: `http://localhost:8000/redoc`
-- Health Check: `http://localhost:8000/health`
+- Swagger UI: `http://localhost:8000/docs`
+- ReDoc: `http://localhost:8000/redoc`
+- Health: `http://localhost:8000/health`
 
-### 7. Run Test Suite
+---
+
+## 🗄️ Alembic Database Migration Guide
+
 ```bash
-uv run pytest -v
+# Apply all pending migrations to latest schema
+uv run alembic upgrade head
+
+# Inspect current schema revision
+uv run alembic current
+
+# Generate new migration based on SQLAlchemy models
+uv run alembic revision --autogenerate -m "add_new_feature_table"
+
+# Roll back by 1 revision
+uv run alembic downgrade -1
 ```
 
+---
+
+## 🐳 Production Docker & Render Deployment
+
+The backend is packaged as a lightweight Docker container built on `python:3.12-slim` with Astral's `uv`:
+
+```dockerfile
+# backend/Dockerfile
+FROM python:3.12-slim
+WORKDIR /app
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
+COPY pyproject.toml uv.lock ./
+RUN uv sync --frozen --no-dev
+COPY alembic.ini ./
+COPY alembic/ ./alembic/
+COPY app/ ./app/
+EXPOSE 10000 8000
+CMD ["sh", "-c", "uv run alembic upgrade head && uv run uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-10000}"]
+```
+
+### Production Environment Variables on Render:
+- `DATABASE_URL`: `postgresql+asyncpg://...`
+- `JWT_SECRET_KEY`: `<32+ random characters>`
+- `CORS_ORIGINS`: `["https://dayflow-hrms-chi.vercel.app","http://localhost:3000"]`
+- `APP_BASE_URL`: `https://dayflow-hrms-chi.vercel.app`
 
 ---
 
-## 👥 Demo Personas (Password: `password123`)
+## 📡 Complete API Route Specification
 
-| Name | Role | Email | Employee ID | Monthly Wage |
-| :--- | :--- | :--- | :--- | :--- |
-| **Arthur Morgan** | `ADMIN` | `admin@dayflow.io` | `EMP-001` | ₹120,000 |
-| **Sarah Jenkins** | `HR` | `sarah.hr@dayflow.io` | `EMP-002` | ₹90,000 |
-| **Alex Rivera** | `EMPLOYEE` | `alex.rivera@dayflow.io` | `EMP-003` | ₹75,000 |
-| **Elena Rostova** | `EMPLOYEE` | `elena.rostova@dayflow.io` | `EMP-004` | ₹85,000 |
-| **David Chen** | `EMPLOYEE` | `david.chen@dayflow.io` | `EMP-005` | ₹70,000 |
-| **Priya Sharma** | `EMPLOYEE` | `priya.sharma@dayflow.io` | `EMP-006` | ₹55,000 |
-| **Marcus Vance** | `EMPLOYEE` | `marcus.vance@dayflow.io` | `EMP-007` | ₹80,000 |
-| **Chloe Dupont** | `EMPLOYEE` | `chloe.dupont@dayflow.io` | `EMP-008` | ₹65,000 |
-| **Jordan Bell** | `EMPLOYEE` | `jordan.bell@dayflow.io` | `EMP-009` | ₹95,000 |
-| **Aisha Khan** | `EMPLOYEE` | `aisha.khan@dayflow.io` | `EMP-010` | ₹50,000 |
-| **Liam Nelson** | `EMPLOYEE` | `liam.nelson@dayflow.io` | `EMP-011` | ₹82,000 |
+```
+Tag             Method   Endpoint                               Description
+─────────────────────────────────────────────────────────────────────────────────────────────
+Auth            POST     /api/v1/auth/login                     Authenticate & issue JWT token
+Auth            POST     /api/v1/auth/change-password           Change password / 1st-login reset
+Auth            POST     /api/v1/auth/forgot-password           Trigger password recovery email
+Auth            POST     /api/v1/auth/register                  Onboard employee into tenant
+Auth            GET      /api/v1/auth/me                        Get current authenticated user profile
+│
+Super Admin     GET      /api/v1/super-admin/companies          List all tenant workspaces
+Super Admin     POST     /api/v1/super-admin/companies          Provision new tenant workspace
+Super Admin     PATCH    /api/v1/super-admin/companies/{id}/status Toggle workspace status
+Super Admin     GET      /api/v1/super-admin/inquiries          List enterprise client leads
+Super Admin     PATCH    /api/v1/super-admin/inquiries/{id}/status Update inquiry status
+│
+Inquiries       POST     /api/v1/inquiries                      Public lead intake from /contact
+│
+Employees       GET      /api/v1/employees/me                   Get employee self profile
+Employees       GET      /api/v1/employees                      List tenant staff directory
+Employees       GET      /api/v1/employees/{id}                 Get employee detail by ID
+Employees       PUT      /api/v1/employees/{id}                 Update employee master record
+│
+Attendance      POST     /api/v1/attendance/check-in            Record daily clock-in timestamp
+Attendance      POST     /api/v1/attendance/check-out           Record daily clock-out timestamp
+Attendance      GET      /api/v1/attendance/me                  Get employee personal attendance
+Attendance      GET      /api/v1/attendance                     Get company-wide attendance grid
+│
+Leaves          POST     /api/v1/leaves                         Submit time-off application
+Leaves          GET      /api/v1/leaves/me                      Get personal leave balances & log
+Leaves          GET      /api/v1/leaves                         Get company leave approval queue
+Leaves          PATCH    /api/v1/leaves/{id}/approve            Approve leave request (HR/Admin)
+Leaves          PATCH    /api/v1/leaves/{id}/reject             Reject leave request (HR/Admin)
+│
+Payroll         GET      /api/v1/payroll/me                     Get employee personal payslip
+Payroll         GET      /api/v1/payroll/{id}                   Get employee statutory breakdown
+Payroll         PUT      /api/v1/payroll/{id}/salary            Update base CTC & auto-recompute
+│
+Analytics       GET      /api/v1/analytics/dashboard            Get live executive telemetry KPIs
+Notifications   GET      /api/v1/notifications                  Get user in-app notifications
+```
 
 ---
 
-## 📡 REST API Summary
+<div align="center">
 
-- **Auth**: `POST /api/v1/auth/login`, `POST /api/v1/auth/register`, `GET /api/v1/auth/me`
-- **Employees**: `GET /api/v1/employees/me`, `GET /api/v1/employees`, `GET /api/v1/employees/{id}`, `PUT /api/v1/employees/{id}`
-- **Attendance**: `POST /api/v1/attendance/check-in`, `POST /api/v1/attendance/check-out`, `GET /api/v1/attendance/me`, `GET /api/v1/attendance`
-- **Leaves**: `POST /api/v1/leaves`, `GET /api/v1/leaves/me`, `GET /api/v1/leaves`, `PATCH /api/v1/leaves/{id}/approve`, `PATCH /api/v1/leaves/{id}/reject`
-- **Payroll**: `GET /api/v1/payroll/me`, `GET /api/v1/admin/payroll/{id}`, `PUT /api/v1/admin/payroll/{id}/salary`, `POST /api/v1/admin/payroll/{id}/calculate`
-- **Analytics**: `GET /api/v1/analytics/dashboard`
-- **Notifications**: `GET /api/v1/notifications`, `PATCH /api/v1/notifications/{id}/read`
+**Dayflow HRMS Backend** • Powering Enterprise Workforce Operations
+
+</div>
