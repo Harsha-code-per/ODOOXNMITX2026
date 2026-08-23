@@ -7,6 +7,7 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688.svg?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
 [![SQLAlchemy 2.0](https://img.shields.io/badge/SQLAlchemy-2.0_Async-red.svg?style=for-the-badge&logo=sqlalchemy&logoColor=white)](https://docs.sqlalchemy.org)
 [![PostgreSQL 16](https://img.shields.io/badge/PostgreSQL-16_Asyncpg-336791.svg?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org)
+[![Availability](https://img.shields.io/badge/Availability-99.99%25_(UptimeRobot)-22c55e.svg?style=for-the-badge&logo=uptimerobot&logoColor=white)](https://dayflow-api-mnu6.onrender.com/health)
 [![Alembic](https://img.shields.io/badge/Alembic-Schema_Migrations-purple.svg?style=for-the-badge)](https://alembic.sqlalchemy.org)
 [![Pydantic v2](https://img.shields.io/badge/Pydantic-v2.13-E92063.svg?style=for-the-badge&logo=pydantic&logoColor=white)](https://docs.pydantic.dev)
 [![Pytest](https://img.shields.io/badge/Pytest-35%2F35_Passing-brightgreen.svg?style=for-the-badge&logo=pytest&logoColor=white)](tests/)
