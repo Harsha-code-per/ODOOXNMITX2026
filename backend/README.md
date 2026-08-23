@@ -14,7 +14,7 @@
 <br/>
 
 **Architecture**: Multi-Tenant SaaS Async Engine with Row-Level Isolation  
-**Database**: PostgreSQL 16 on Render (`dayflow_whry`) / SQLite local fallback  
+**Database**: PostgreSQL 16 Managed Instance / SQLite local fallback  
 **Production URL**: [https://dayflow-api-mnu8.onrender.com](https://dayflow-api-mnu8.onrender.com)  
 **Swagger API Docs**: [https://dayflow-api-mnu8.onrender.com/docs](https://dayflow-api-mnu8.onrender.com/docs)
 

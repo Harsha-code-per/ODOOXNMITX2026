@@ -60,7 +60,7 @@ Built from the ground up for the **Odoo × NMIT Hackathon 2026**, Dayflow combin
 | **Frontend Web App** | Vercel | 🟢 **Active** | [`https://dayflow-hrms-chi.vercel.app`](https://dayflow-hrms-chi.vercel.app/) |
 | **Backend REST API** | Render | 🟢 **Active** | [`https://dayflow-api-mnu8.onrender.com`](https://dayflow-api-mnu8.onrender.com/) |
 | **Interactive Swagger Docs** | Render | 🟢 **Active** | [`https://dayflow-api-mnu8.onrender.com/docs`](https://dayflow-api-mnu8.onrender.com/docs) |
-| **PostgreSQL 16 Database** | Render Managed | 🟢 **Active** | `dpg-da4ot00jo6nc73dm46e0-a` (Singapore Region) |
+| **PostgreSQL 16 Database** | Render Managed | 🟢 **Active** | Isolated Relational Storage (Singapore Region) |
 
 ---
 
