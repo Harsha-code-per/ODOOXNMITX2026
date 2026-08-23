@@ -3,7 +3,7 @@
 # ⚡ Dayflow HRMS — FastAPI Async Backend
 ### *Enterprise Multi-Tenant REST API & Statutory Payroll Governance Engine*
 
-[![Live on Render](https://img.shields.io/badge/Render-Live_API-46E3B7.svg?style=for-the-badge&logo=render&logoColor=white)](https://dayflow-api-mnu8.onrender.com/docs)
+[![Live on Render](https://img.shields.io/badge/Render-Live_API-46E3B7.svg?style=for-the-badge&logo=render&logoColor=white)](https://dayflow-api-mnu6.onrender.com/docs)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688.svg?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
 [![SQLAlchemy 2.0](https://img.shields.io/badge/SQLAlchemy-2.0_Async-red.svg?style=for-the-badge&logo=sqlalchemy&logoColor=white)](https://docs.sqlalchemy.org)
 [![PostgreSQL 16](https://img.shields.io/badge/PostgreSQL-16_Asyncpg-336791.svg?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org)
@@ -15,8 +15,8 @@
 
 **Architecture**: Multi-Tenant SaaS Async Engine with Row-Level Isolation  
 **Database**: PostgreSQL 16 Managed Instance / SQLite local fallback  
-**Production URL**: [https://dayflow-api-mnu8.onrender.com](https://dayflow-api-mnu8.onrender.com)  
-**Swagger API Docs**: [https://dayflow-api-mnu8.onrender.com/docs](https://dayflow-api-mnu8.onrender.com/docs)
+**Production URL**: [https://dayflow-api-mnu6.onrender.com](https://dayflow-api-mnu6.onrender.com)  
+**Swagger API Docs**: [https://dayflow-api-mnu6.onrender.com/docs](https://dayflow-api-mnu6.onrender.com/docs)
 
 </div>
 

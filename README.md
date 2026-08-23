@@ -4,7 +4,7 @@
 ### *Next-Generation Enterprise Workforce Operating System & Multi-Tenant SaaS Platform*
 
 [![Live Demo](https://img.shields.io/badge/Production_App-Vercel_Live-000000.svg?style=for-the-badge&logo=vercel&logoColor=white)](https://dayflow-hrms-chi.vercel.app/)
-[![API Docs](https://img.shields.io/badge/REST_API-FastAPI_Swagger-009688.svg?style=for-the-badge&logo=fastapi&logoColor=white)](https://dayflow-api-mnu8.onrender.com/docs)
+[![API Docs](https://img.shields.io/badge/REST_API-FastAPI_Swagger-009688.svg?style=for-the-badge&logo=fastapi&logoColor=white)](https://dayflow-api-mnu6.onrender.com/docs)
 [![Database](https://img.shields.io/badge/PostgreSQL_16-Render_Managed-336791.svg?style=for-the-badge&logo=postgresql&logoColor=white)](https://render.com)
 [![Build Status](https://img.shields.io/badge/Tests-35%2F35_Passing_(100%25)-brightgreen.svg?style=for-the-badge&logo=pytest&logoColor=white)](#-automated-test-suite--verification)
 [![License: MIT](https://img.shields.io/badge/License-MIT-emerald.svg?style=for-the-badge)](LICENSE)
@@ -58,8 +58,8 @@ Built from the ground up for the **Odoo × NMIT Hackathon 2026**, Dayflow combin
 | Component | Cloud Provider | Status | Live URL |
 | :--- | :--- | :---: | :--- |
 | **Frontend Web App** | Vercel | 🟢 **Active** | [`https://dayflow-hrms-chi.vercel.app`](https://dayflow-hrms-chi.vercel.app/) |
-| **Backend REST API** | Render | 🟢 **Active** | [`https://dayflow-api-mnu8.onrender.com`](https://dayflow-api-mnu8.onrender.com/) |
-| **Interactive Swagger Docs** | Render | 🟢 **Active** | [`https://dayflow-api-mnu8.onrender.com/docs`](https://dayflow-api-mnu8.onrender.com/docs) |
+| **Backend REST API** | Render | 🟢 **Active** | [`https://dayflow-api-mnu6.onrender.com`](https://dayflow-api-mnu6.onrender.com/) |
+| **Interactive Swagger Docs** | Render | 🟢 **Active** | [`https://dayflow-api-mnu6.onrender.com/docs`](https://dayflow-api-mnu6.onrender.com/docs) |
 | **PostgreSQL 16 Database** | Render Managed | 🟢 **Active** | Isolated Relational Storage (Singapore Region) |
 
 ---

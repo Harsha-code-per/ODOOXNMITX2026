@@ -174,7 +174,7 @@ Create `.env.local` in the `frontend/` directory:
 NEXT_PUBLIC_USE_MOCK=false
 
 # Backend REST API Base URL
-NEXT_PUBLIC_API_URL=https://dayflow-api-mnu8.onrender.com/api/v1
+NEXT_PUBLIC_API_URL=https://dayflow-api-mnu6.onrender.com/api/v1
 ```
 
 ---
